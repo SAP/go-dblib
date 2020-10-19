@@ -45,28 +45,28 @@ func convertDecimal10(sample string) (*types.Decimal, error) {
 	return types.NewDecimalString(1, 0, sample)
 }
 
-//go:generate go run ./gen_type.go Decimal10 github.com/SAP/go-ase/libase/*types.Decimal -columndef decimal(1,0) -convert convertDecimal10 -compare compareDecimal
+//go:generate go run ./gen_type.go Decimal10 github.com/SAP/go-dblib/*types.Decimal -columndef decimal(1,0) -convert convertDecimal10 -compare compareDecimal
 var samplesDecimal10 = []string{"0", "1", "9"}
 
 func convertDecimal380(sample string) (*types.Decimal, error) {
 	return types.NewDecimalString(38, 0, sample)
 }
 
-//go:generate go run ./gen_type.go Decimal380 github.com/SAP/go-ase/libase/*types.Decimal -columndef decimal(38,0) -convert convertDecimal380 -compare compareDecimal
+//go:generate go run ./gen_type.go Decimal380 github.com/SAP/go-dblib/*types.Decimal -columndef decimal(38,0) -convert convertDecimal380 -compare compareDecimal
 var samplesDecimal380 = []string{"99999999999999999999999999999999999999"}
 
 func convertDecimal3838(sample string) (*types.Decimal, error) {
 	return types.NewDecimalString(38, 38, sample)
 }
 
-//go:generate go run ./gen_type.go Decimal3838 github.com/SAP/go-ase/libase/*types.Decimal -columndef decimal(38,38) -convert convertDecimal3838 -compare compareDecimal
+//go:generate go run ./gen_type.go Decimal3838 github.com/SAP/go-dblib/*types.Decimal -columndef decimal(38,38) -convert convertDecimal3838 -compare compareDecimal
 var samplesDecimal3838 = []string{".99999999999999999999999999999999999999"}
 
 func convertDecimal3819(sample string) (*types.Decimal, error) {
 	return types.NewDecimalString(38, 19, sample)
 }
 
-//go:generate go run ./gen_type.go Decimal github.com/SAP/go-ase/libase/*types.Decimal -columndef "decimal(38,19)" -convert convertDecimal3819 -compare compareDecimal
+//go:generate go run ./gen_type.go Decimal github.com/SAP/go-dblib/*types.Decimal -columndef "decimal(38,19)" -convert convertDecimal3819 -compare compareDecimal
 var samplesDecimal = []string{
 	// ASE max
 	"1234567890123456789",
@@ -114,7 +114,7 @@ func convertMoney(sample string) (*types.Decimal, error) {
 	return types.NewDecimalString(types.ASEMoneyPrecision, types.ASEMoneyScale, sample)
 }
 
-//go:generate go run ./gen_type.go Money github.com/SAP/go-ase/libase/*types.Decimal -convert convertMoney -compare compareDecimal
+//go:generate go run ./gen_type.go Money github.com/SAP/go-dblib/*types.Decimal -convert convertMoney -compare compareDecimal
 var samplesMoney = []string{
 	// ASE min
 	"-922337203685477.5807",
@@ -130,7 +130,7 @@ func convertSmallMoney(sample string) (*types.Decimal, error) {
 	return types.NewDecimalString(types.ASEShortMoneyPrecision, types.ASEShortMoneyScale, sample)
 }
 
-//go:generate go run ./gen_type.go Money4 github.com/SAP/go-ase/libase/*types.Decimal -columndef smallmoney -convert convertSmallMoney -compare compareDecimal
+//go:generate go run ./gen_type.go Money4 github.com/SAP/go-dblib/*types.Decimal -columndef smallmoney -convert convertSmallMoney -compare compareDecimal
 var samplesMoney4 = []string{
 	// ASE min
 	"-214748.3648",
@@ -179,7 +179,7 @@ var samplesDateTime = []time.Time{
 }
 
 //go:generate go run ./gen_type.go BigDateTime time.Time
-// TODO: -null github.com/SAP/go-ase/libase/types.NullTime
+// TODO: -null github.com/SAP/go-dblib/types.NullTime
 var samplesBigDateTime = []time.Time{
 	// Sybase & Golang zero-value; January 1, 0001 Midnight
 	time.Time{},
@@ -217,14 +217,14 @@ func compareChar(recv, expect string) bool {
 }
 
 //go:generate go run ./gen_type.go Binary []byte -columndef binary(13) -compare compareBinary
-// TODO: -null github.com/SAP/go-ase/libase/types.NullBinary
+// TODO: -null github.com/SAP/go-dblib/types.NullBinary
 var samplesBinary = [][]byte{
 	[]byte("test"),
 	[]byte("a longer test"),
 }
 
 //go:generate go run ./gen_type.go VarBinary []byte -columndef varbinary(13) -compare compareBinary
-// TODO: -null github.com/SAP/go-ase/libase/types.NullBinary
+// TODO: -null github.com/SAP/go-dblib/types.NullBinary
 var samplesVarBinary = samplesBinary
 
 func compareBinary(recv, expect []byte) bool {
@@ -236,7 +236,7 @@ func compareBinary(recv, expect []byte) bool {
 var samplesBit = []bool{true, false}
 
 //go:generate go run ./gen_type.go Image []byte -compare compareBinary
-// TODO: -null github.com/SAP/go-ase/libase/types.NullBinary
+// TODO: -null github.com/SAP/go-dblib/types.NullBinary
 var samplesImage = [][]byte{[]byte("test"), []byte("a longer test")}
 
 // TODO: Separate null test, ctlib transforms empty value to null

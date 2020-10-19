@@ -33,7 +33,8 @@ type fmtStatus uint
 
 const (
 	tdsFmtColumnStatus fmtStatus = 0x8
-	tdsFmtNullAllowed  fmtStatus = 0x20
+	// TODO: Nulltypes
+	// tdsFmtNullAllowed  fmtStatus = 0x20
 )
 
 //go:generate stringer -type=ParamFmtStatus
