@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package types
+package asetypes
 
 // ByteSizes maps a DataType to the length of their byte
 // representation.

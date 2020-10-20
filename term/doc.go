@@ -2,5 +2,5 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// aseterm contains common code for cgoase and goase.
+// term contains common code for interactive database clients.
 package term

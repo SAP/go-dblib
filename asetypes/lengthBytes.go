@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package types
+package asetypes
 
 // LengthBytes maps a DataType to number of bytes in their length
 // property.

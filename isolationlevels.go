@@ -9,41 +9,41 @@ import (
 	"fmt"
 )
 
-// IsolationLevel reflects the ASE isolation levels.
-type IsolationLevel int
+// ASEIsolationLevel reflects the ASE isolation levels.
+type ASEIsolationLevel int
 
 // Valid ASE isolation levels.
 const (
-	LevelInvalid         IsolationLevel = -1
-	LevelReadUncommitted IsolationLevel = iota
-	LevelReadCommitted
-	LevelRepeatableRead
-	LevelSerializableRead
+	ASELevelInvalid         ASEIsolationLevel = -1
+	ASELevelReadUncommitted ASEIsolationLevel = iota
+	ASELevelReadCommitted
+	ASELevelRepeatableRead
+	ASELevelSerializableRead
 )
 
 var (
-	// sql2ase maps sql.IsolationLevel to libase.IsolationLevel.
-	sql2ase = map[sql.IsolationLevel]IsolationLevel{
-		sql.LevelDefault:         LevelReadCommitted,
-		sql.LevelReadUncommitted: LevelReadUncommitted,
-		sql.LevelReadCommitted:   LevelReadCommitted,
-		sql.LevelWriteCommitted:  LevelInvalid,
-		sql.LevelRepeatableRead:  LevelRepeatableRead,
-		sql.LevelSerializable:    LevelSerializableRead,
-		sql.LevelLinearizable:    LevelInvalid,
+	// sql2ase maps sql.IsolationLevel to dblib.ASEIsolationLevel.
+	sql2ase = map[sql.IsolationLevel]ASEIsolationLevel{
+		sql.LevelDefault:         ASELevelReadCommitted,
+		sql.LevelReadUncommitted: ASELevelReadUncommitted,
+		sql.LevelReadCommitted:   ASELevelReadCommitted,
+		sql.LevelWriteCommitted:  ASELevelInvalid,
+		sql.LevelRepeatableRead:  ASELevelRepeatableRead,
+		sql.LevelSerializable:    ASELevelSerializableRead,
+		sql.LevelLinearizable:    ASELevelInvalid,
 	}
 )
 
-// IsolationLevelFromGo take a database/sql.IsolationLevel and returns
+// ASEIsolationLevelFromGo take a database/sql.IsolationLevel and returns
 // the relevant isolation level for ASE.
-func IsolationLevelFromGo(lvl sql.IsolationLevel) (IsolationLevel, error) {
+func ASEIsolationLevelFromGo(lvl sql.IsolationLevel) (ASEIsolationLevel, error) {
 	aseLvl, ok := sql2ase[lvl]
 	if !ok {
-		return LevelInvalid, fmt.Errorf("Unknown database/sql.IsolationLevel: %v", lvl)
+		return ASELevelInvalid, fmt.Errorf("Unknown database/sql.IsolationLevel: %v", lvl)
 	}
 
-	if aseLvl == LevelInvalid {
-		return LevelInvalid, fmt.Errorf("Isolation level %v is not supported by ASE", lvl)
+	if aseLvl == ASELevelInvalid {
+		return ASELevelInvalid, fmt.Errorf("Isolation level %v is not supported by ASE", lvl)
 	}
 
 	return aseLvl, nil
@@ -51,7 +51,7 @@ func IsolationLevelFromGo(lvl sql.IsolationLevel) (IsolationLevel, error) {
 
 // ToGo returns the database/sql.IsolationLevel equivalent of the ASE
 // isolation level.
-func (lvl IsolationLevel) ToGo() sql.IsolationLevel {
+func (lvl ASEIsolationLevel) ToGo() sql.IsolationLevel {
 	for sqlLvl, aseLvl := range sql2ase {
 		if aseLvl == lvl {
 			return sqlLvl
@@ -62,6 +62,6 @@ func (lvl IsolationLevel) ToGo() sql.IsolationLevel {
 }
 
 // String implements the Stringer interface.
-func (lvl IsolationLevel) String() string {
+func (lvl ASEIsolationLevel) String() string {
 	return lvl.ToGo().String()
 }

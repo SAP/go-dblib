@@ -16,7 +16,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/SAP/go-dblib/types"
+	"github.com/SAP/go-dblib/asetypes"
 )
 
 var (
@@ -120,7 +120,7 @@ func processRows(rows driver.Rows) error {
 			s := " %-" + strconv.Itoa(colLengths[i]) + "v |"
 			switch rowsColumnTypeName.ColumnTypeDatabaseTypeName(i) {
 			case "DECIMAL":
-				fmt.Printf(s, cell.(*types.Decimal).String())
+				fmt.Printf(s, cell.(*asetypes.Decimal).String())
 			case "IMAGE":
 				b := hex.EncodeToString(cell.([]byte))
 				if len(b) > colLengths[i] {

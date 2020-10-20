@@ -19,7 +19,7 @@ package tds
 import (
 	"fmt"
 
-	"github.com/SAP/go-dblib/types"
+	"github.com/SAP/go-dblib/asetypes"
 )
 
 // Both Param- and RowFmtStatus are uints communicated using
@@ -75,8 +75,8 @@ const (
 
 type FieldFmt interface {
 	// Format information as sent to or received from TDS server
-	DataType() types.DataType
-	setDataType(types.DataType)
+	DataType() asetypes.DataType
+	setDataType(asetypes.DataType)
 	SetName(string)
 	Name() string
 
@@ -138,7 +138,7 @@ type FieldData interface {
 // Base structs
 
 type fieldFmtBase struct {
-	dataType types.DataType
+	dataType asetypes.DataType
 	name     string
 
 	// specific to TDS_ROWFMT2
@@ -158,11 +158,11 @@ type fieldFmtBase struct {
 	maxLength int64
 }
 
-func (field fieldFmtBase) DataType() types.DataType {
+func (field fieldFmtBase) DataType() asetypes.DataType {
 	return field.dataType
 }
 
-func (field *fieldFmtBase) setDataType(t types.DataType) {
+func (field *fieldFmtBase) setDataType(t asetypes.DataType) {
 	field.dataType = t
 }
 
@@ -717,7 +717,7 @@ func (field *fieldDataPrecisionScale) ReadFrom(ch BytesChannel) (int, error) {
 		return n, err
 	}
 
-	dec, ok := field.value.(*types.Decimal)
+	dec, ok := field.value.(*asetypes.Decimal)
 	if !ok {
 		return n, fmt.Errorf("%T is not of type decimal", field.value)
 	}
@@ -1150,94 +1150,94 @@ func writeLengthBytes(ch BytesChannel, byteCount int, n int64) error {
 
 // LookupFieldFmt returns the FieldFmt for a given data type and sets
 // required values in it.
-func LookupFieldFmt(dataType types.DataType) (FieldFmt, error) {
+func LookupFieldFmt(dataType asetypes.DataType) (FieldFmt, error) {
 	var f FieldFmt
 	switch dataType {
-	case types.BIGDATETIMEN:
+	case asetypes.BIGDATETIMEN:
 		f = &BigDateTimeNFieldFmt{}
-	case types.BIGTIMEN:
+	case asetypes.BIGTIMEN:
 		f = &BigTimeNFieldFmt{}
-	case types.BIT:
+	case asetypes.BIT:
 		f = &BitFieldFmt{}
-	case types.DATETIME:
+	case asetypes.DATETIME:
 		f = &DateTimeFieldFmt{}
-	case types.DATE:
+	case asetypes.DATE:
 		f = &DateFieldFmt{}
-	case types.SHORTDATE:
+	case asetypes.SHORTDATE:
 		f = &ShortDateFieldFmt{}
-	case types.FLT4:
+	case asetypes.FLT4:
 		f = &Flt4FieldFmt{}
-	case types.FLT8:
+	case asetypes.FLT8:
 		f = &Flt8FieldFmt{}
-	case types.INT1:
+	case asetypes.INT1:
 		f = &Int1FieldFmt{}
-	case types.INT2:
+	case asetypes.INT2:
 		f = &Int2FieldFmt{}
-	case types.INT4:
+	case asetypes.INT4:
 		f = &Int4FieldFmt{}
-	case types.INT8:
+	case asetypes.INT8:
 		f = &Int8FieldFmt{}
-	case types.INTERVAL:
+	case asetypes.INTERVAL:
 		f = &IntervalFieldFmt{}
-	case types.SINT1:
+	case asetypes.SINT1:
 		f = &Sint1FieldFmt{}
-	case types.UINT2:
+	case asetypes.UINT2:
 		f = &Uint2FieldFmt{}
-	case types.UINT4:
+	case asetypes.UINT4:
 		f = &Uint4FieldFmt{}
-	case types.UINT8:
+	case asetypes.UINT8:
 		f = &Uint8FieldFmt{}
-	case types.MONEY:
+	case asetypes.MONEY:
 		f = &MoneyFieldFmt{}
-	case types.SHORTMONEY:
+	case asetypes.SHORTMONEY:
 		f = &ShortMoneyFieldFmt{}
-	case types.TIME:
+	case asetypes.TIME:
 		f = &TimeFieldFmt{}
-	case types.BINARY:
+	case asetypes.BINARY:
 		f = &BinaryFieldFmt{}
-	case types.BOUNDARY:
+	case asetypes.BOUNDARY:
 		f = &BoundaryFieldFmt{}
-	case types.CHAR:
+	case asetypes.CHAR:
 		f = &CharFieldFmt{}
-	case types.DATEN:
+	case asetypes.DATEN:
 		f = &DateNFieldFmt{}
-	case types.DATETIMEN:
+	case asetypes.DATETIMEN:
 		f = &DateTimeNFieldFmt{}
-	case types.FLTN:
+	case asetypes.FLTN:
 		f = &FltNFieldFmt{}
-	case types.INTN:
+	case asetypes.INTN:
 		f = &IntNFieldFmt{}
-	case types.UINTN:
+	case asetypes.UINTN:
 		f = &UintNFieldFmt{}
-	case types.LONGBINARY:
+	case asetypes.LONGBINARY:
 		f = &LongBinaryFieldFmt{}
 		f.setMaxLength(2147483647)
-	case types.LONGCHAR:
+	case asetypes.LONGCHAR:
 		f = &LongCharFieldFmt{}
-	case types.MONEYN:
+	case asetypes.MONEYN:
 		f = &MoneyNFieldFmt{}
-	case types.SENSITIVITY:
+	case asetypes.SENSITIVITY:
 		f = &SensitivityFieldFmt{}
-	case types.TIMEN:
+	case asetypes.TIMEN:
 		f = &TimeNFieldFmt{}
-	case types.VARBINARY:
+	case asetypes.VARBINARY:
 		f = &VarBinaryFieldFmt{}
-	case types.VARCHAR:
+	case asetypes.VARCHAR:
 		f = &VarCharFieldFmt{}
 		f.setMaxLength(255)
-	case types.DECN:
+	case asetypes.DECN:
 		f = &DecNFieldFmt{}
-	case types.NUMN:
+	case asetypes.NUMN:
 		f = &NumNFieldFmt{}
-	case types.BLOB:
+	case asetypes.BLOB:
 		f = &BlobFieldFmt{}
-	case types.IMAGE:
+	case asetypes.IMAGE:
 		f = &ImageFieldFmt{}
-	case types.TEXT:
+	case asetypes.TEXT:
 		f = &TextFieldFmt{}
-	case types.UNITEXT:
+	case asetypes.UNITEXT:
 		f = &UniTextFieldFmt{}
-	case types.XML:
+	case asetypes.XML:
 		f = &XMLFieldFmt{}
 	default:
 		return nil, fmt.Errorf("unhandled datatype '%s'", dataType)
@@ -1252,89 +1252,89 @@ func LookupFieldData(fieldFmt FieldFmt) (FieldData, error) {
 	var d FieldData
 
 	switch fieldFmt.DataType() {
-	case types.BIGDATETIMEN:
+	case asetypes.BIGDATETIMEN:
 		d = &BigDateTimeNFieldData{}
-	case types.BIGTIMEN:
+	case asetypes.BIGTIMEN:
 		d = &BigTimeNFieldData{}
-	case types.BIT:
+	case asetypes.BIT:
 		d = &BitFieldData{}
-	case types.DATETIME:
+	case asetypes.DATETIME:
 		d = &DateTimeFieldData{}
-	case types.DATE:
+	case asetypes.DATE:
 		d = &DateFieldData{}
-	case types.SHORTDATE:
+	case asetypes.SHORTDATE:
 		d = &ShortDateFieldData{}
-	case types.FLT4:
+	case asetypes.FLT4:
 		d = &Flt4FieldData{}
-	case types.FLT8:
+	case asetypes.FLT8:
 		d = &Flt8FieldData{}
-	case types.INT1:
+	case asetypes.INT1:
 		d = &Int1FieldData{}
-	case types.INT2:
+	case asetypes.INT2:
 		d = &Int2FieldData{}
-	case types.INT4:
+	case asetypes.INT4:
 		d = &Int4FieldData{}
-	case types.INT8:
+	case asetypes.INT8:
 		d = &Int8FieldData{}
-	case types.INTERVAL:
+	case asetypes.INTERVAL:
 		d = &IntervalFieldData{}
-	case types.SINT1:
+	case asetypes.SINT1:
 		d = &Sint1FieldData{}
-	case types.UINT2:
+	case asetypes.UINT2:
 		d = &Uint2FieldData{}
-	case types.UINT4:
+	case asetypes.UINT4:
 		d = &Uint4FieldData{}
-	case types.UINT8:
+	case asetypes.UINT8:
 		d = &Uint8FieldData{}
-	case types.MONEY:
+	case asetypes.MONEY:
 		d = &MoneyFieldData{}
-	case types.SHORTMONEY:
+	case asetypes.SHORTMONEY:
 		d = &ShortMoneyFieldData{}
-	case types.TIME:
+	case asetypes.TIME:
 		d = &TimeFieldData{}
-	case types.BINARY:
+	case asetypes.BINARY:
 		d = &BinaryFieldData{}
-	case types.BOUNDARY:
+	case asetypes.BOUNDARY:
 		d = &BoundaryFieldData{}
-	case types.CHAR:
+	case asetypes.CHAR:
 		d = &CharFieldData{}
-	case types.DATEN:
+	case asetypes.DATEN:
 		d = &DateNFieldData{}
-	case types.DATETIMEN:
+	case asetypes.DATETIMEN:
 		d = &DateTimeNFieldData{}
-	case types.FLTN:
+	case asetypes.FLTN:
 		d = &FltNFieldData{}
-	case types.INTN:
+	case asetypes.INTN:
 		d = &IntNFieldData{}
-	case types.UINTN:
+	case asetypes.UINTN:
 		d = &UintNFieldData{}
-	case types.LONGBINARY:
+	case asetypes.LONGBINARY:
 		d = &LongBinaryFieldData{}
-	case types.LONGCHAR:
+	case asetypes.LONGCHAR:
 		d = &LongCharFieldData{}
-	case types.MONEYN:
+	case asetypes.MONEYN:
 		d = &MoneyNFieldData{}
-	case types.SENSITIVITY:
+	case asetypes.SENSITIVITY:
 		d = &SensitivityFieldData{}
-	case types.TIMEN:
+	case asetypes.TIMEN:
 		d = &TimeNFieldData{}
-	case types.VARBINARY:
+	case asetypes.VARBINARY:
 		d = &VarBinaryFieldData{}
-	case types.VARCHAR:
+	case asetypes.VARCHAR:
 		d = &VarCharFieldData{}
-	case types.DECN:
+	case asetypes.DECN:
 		d = &DecNFieldData{}
-	case types.NUMN:
+	case asetypes.NUMN:
 		d = &NumNFieldData{}
-	case types.BLOB:
+	case asetypes.BLOB:
 		d = &BlobFieldData{}
-	case types.IMAGE:
+	case asetypes.IMAGE:
 		d = &ImageFieldData{}
-	case types.TEXT:
+	case asetypes.TEXT:
 		d = &TextFieldData{}
-	case types.UNITEXT:
+	case asetypes.UNITEXT:
 		d = &UniTextFieldData{}
-	case types.XML:
+	case asetypes.XML:
 		d = &XMLFieldData{}
 	default:
 		return nil, fmt.Errorf("unhandled datatype: '%s'", fieldFmt.DataType())
@@ -1346,7 +1346,7 @@ func LookupFieldData(fieldFmt FieldFmt) (FieldData, error) {
 
 // LookupFieldFmtData returns both Fieldfmt and FieldData for a given
 // data type.
-func LookupFieldFmtData(dataType types.DataType) (FieldFmt, FieldData, error) {
+func LookupFieldFmtData(dataType asetypes.DataType) (FieldFmt, FieldData, error) {
 	fieldFmt, err := LookupFieldFmt(dataType)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to find field format: %w", err)

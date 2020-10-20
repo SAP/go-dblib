@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SAP/go-dblib/types"
+	"github.com/SAP/go-dblib/asetypes"
 )
 
 func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
@@ -198,7 +198,7 @@ func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 		return fmt.Errorf("error queueing message package for password transmission: %w", err)
 	}
 
-	passFmt, passData, err := LookupFieldFmtData(types.LONGBINARY)
+	passFmt, passData, err := LookupFieldFmtData(asetypes.LONGBINARY)
 	if err != nil {
 		return fmt.Errorf("failed to look up fields for LONGBINARY: %w", err)
 	}
@@ -224,7 +224,7 @@ func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 		for i := 0; i < len(paramFmts); i += 2 {
 			remoteServer := config.RemoteServers[i/2]
 
-			remnameFmt, remnameData, err := LookupFieldFmtData(types.VARCHAR)
+			remnameFmt, remnameData, err := LookupFieldFmtData(asetypes.VARCHAR)
 			if err != nil {
 				return fmt.Errorf("failed to look up fields for VARCHAR: %w", err)
 			}
@@ -239,7 +239,7 @@ func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 				return fmt.Errorf("error encryption remote server password: %w", err)
 			}
 
-			passFmt, passData, err := LookupFieldFmtData(types.LONGBINARY)
+			passFmt, passData, err := LookupFieldFmtData(asetypes.LONGBINARY)
 			if err != nil {
 				return fmt.Errorf("failed to look up fields for LONGBINARY")
 			}
@@ -272,7 +272,7 @@ func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 		return fmt.Errorf("error queueing package Msg for symmetric key: %w", err)
 	}
 
-	symkeyFmt, symkeyData, err := LookupFieldFmtData(types.LONGBINARY)
+	symkeyFmt, symkeyData, err := LookupFieldFmtData(asetypes.LONGBINARY)
 	if err != nil {
 		return fmt.Errorf("failed to look up fields for LONGBINARY: %w", err)
 	}

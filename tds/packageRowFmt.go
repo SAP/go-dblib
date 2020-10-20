@@ -7,7 +7,7 @@ package tds
 import (
 	"fmt"
 
-	"github.com/SAP/go-dblib/types"
+	"github.com/SAP/go-dblib/asetypes"
 )
 
 var _ Package = (*RowFmtPackage)(nil)
@@ -144,9 +144,9 @@ func (pkg *RowFmtPackage) ReadFromField(ch BytesChannel) (FieldFmt, int, error) 
 	}
 	n++
 
-	fieldFmt, err := LookupFieldFmt(types.DataType(token))
+	fieldFmt, err := LookupFieldFmt(asetypes.DataType(token))
 	if err != nil {
-		return nil, n, fmt.Errorf("error preparing field format for token %s: %w", types.DataType(token), err)
+		return nil, n, fmt.Errorf("error preparing field format for token %s: %w", asetypes.DataType(token), err)
 	}
 
 	fieldFmt.SetName(name)

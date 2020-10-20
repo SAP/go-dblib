@@ -233,8 +233,8 @@ func main() {
 	}
 	d.GoType = goType
 
-	// -null "github.com/SAP/go-ase/libase/types.NullTime"
-	// Split up to type "types.NullTime" and import "github.com/SAP/go-ase/libase/types"
+	// -null "github.com/SAP/go-dblib/asetypes.NullTime"
+	// Split up to type "asetypes.NullTime" and import "github.com/SAP/go-dblib/asetypes"
 	if len(*fNull) > 0 {
 		nullTypeImport, nullType := splitType(*fNull)
 		if len(nullTypeImport) > 0 {
@@ -288,12 +288,12 @@ func main() {
 // ($package.$name) and the import path ($domain.$tld/$package_path).
 //
 // Example:
-//	splitType("github.com/SAP/go-ase/libase/types.NullTime")
-//	-> "github.com/SAP/go-ase/libase/types", "types.NullTime"
+//	splitType("github.com/SAP/go-dblib/asetypes.NullTime")
+//	-> "github.com/SAP/go-dblib/asetypes", "asetypes.NullTime"
 //	splitType("sql.NullInt64")
 //	-> "sql", "sql.NullInt64"
-//	splitType("github.com/SAP/go-ase/libase/*types.Decimal")
-//	-> "github.com/SAP/go-ase/libase/types", "*types.Decimal"
+//	splitType("github.com/SAP/go-dblib/*asetypes.Decimal")
+//	-> "github.com/SAP/go-dblib/asetypes", "*asetypes.Decimal"
 func splitType(input string) (string, string) {
 	if !strings.Contains(input, ".") {
 		// Return immediately on e.g. []byte
@@ -302,13 +302,13 @@ func splitType(input string) (string, string) {
 
 	inputS := strings.Split(input, "/")
 
-	// goType -> "types.NullTime"
+	// goType -> "asetypes.NullTime"
 	goType := inputS[len(inputS)-1]
 
-	// imp -> "types"
+	// imp -> "asetypes"
 	imp := strings.Split(goType, ".")[0]
 	if strings.Contains(input, "/") {
-		// imp -> github.com/SAP/go-ase/libase/types
+		// imp -> github.com/SAP/go-dblib/asetypes
 		imp = strings.Join(
 			[]string{
 				strings.Join(inputS[0:len(inputS)-1], "/"),
@@ -319,7 +319,7 @@ func splitType(input string) (string, string) {
 	}
 
 	// Remove asterisk from pointer types, e.g.
-	// github.com/SAP/go-ase/libase/*types.Decimal
+	// github.com/SAP/go-dblib/*asetypes.Decimal
 	imp = strings.Replace(imp, "*", "", 1)
 
 	return imp, goType

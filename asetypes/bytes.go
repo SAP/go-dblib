@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package types
+package asetypes
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ func (t DataType) Bytes(endian binary.ByteOrder, value interface{}) ([]byte, err
 		bs := make([]byte, t.ByteSize())
 		dec, ok := value.(*Decimal)
 		if !ok {
-			return nil, fmt.Errorf("expected *types.Decimal for %s, received %T", t, value)
+			return nil, fmt.Errorf("expected *asetypes.Decimal for %s, received %T", t, value)
 		}
 		deci := dec.Int()
 
@@ -35,7 +35,7 @@ func (t DataType) Bytes(endian binary.ByteOrder, value interface{}) ([]byte, err
 	case DECN, NUMN:
 		dec, ok := value.(*Decimal)
 		if !ok {
-			return nil, fmt.Errorf("expected *types.Decimal for %s, received %T", t, value)
+			return nil, fmt.Errorf("expected *asetypes.Decimal for %s, received %T", t, value)
 		}
 
 		bs := make([]byte, dec.ByteSize())

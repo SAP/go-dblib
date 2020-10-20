@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package types
+package asetypes
 
 // DataType represents data types used in TDS-based applications.
 //go:generate stringer -type=DataType

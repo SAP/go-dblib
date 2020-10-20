@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package libdsn handles data source names.
+// Package dsn handles data source names.
 package dsn
 
 import (
