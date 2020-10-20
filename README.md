@@ -10,12 +10,25 @@ Badges
 
 ## Description
 
-`dblib` contains the following packages:
+`go-dblib` is a shared library for [`go-ase`][purego] and
+[`cgo-ase`][cgo]. These are driver-implementations for the
+[`database/sql`][pkg-database-sql] package of [Go (golang)][go] to
+provide access to SAP ASE instances.
+
+SAP ASE is the shorthand for [SAP Adaptive Server Enterprise][sap-ase],
+a relational model database server originally known as Sybase SQL
+Server.
+
+
+`go-dblib` contains the following packages:
 
 - `asetime`: Contains code for ...
 - `capability`: Contains code for ...
 - `flagslice`: Contains code for ...
-- `integration`: Contains code for ...
+- `integration` contains a test-setup to conduct integration-tests in
+  the respective driver-implementations for
+[`go-ase/integration_test.go`][purego] and
+[`cgo-ase/integration_test.go`][cgo].
 - `dsn`: Contains code for ...
 - `namepool`: Contains code for ...
 - `tds`: Contains code for ...
@@ -24,21 +37,65 @@ Badges
 
 ## Requirements
 
+The package `go-dblib` is a shared library for the
+driver-implementations of [`go-ase`][purego] and [`cgo-ase`][cgo]. Thus, one of
+these implementations is required.
 
-## Download and Usage
+## Download
 
+The packages in this repo can be `go get` and imported as usual.
 
-### Examples
+```sh
+go get github.com/SAP/go-dblib
+```
 
+## Usage (Example)
 
-### Unit tests
+By importing `go-dblib` there are several use-cases. For example, the
+`dsn`-package can be used to set up DSN information that is required to
+connect to the ASE-database by using a connector.
 
+```go
+package main
 
-## Configuration (Is this cgo/go-ASE-driver specific?)
+import (
+    "database/sql"
 
+    "github.com/SAP/go-dblib/dsn"
+    "github.com/SAP/cgo-ase"
+)
 
-## Limitations
+func main() {
+    d := dsn.NewDsnInfo()
+    d.Host = "hostname"
+    d.Port = "4901"
+    d.Username = "user"
+    d.Password = "pass"
 
+    connector, err := ase.NewConnector(*d)
+    if err != nil {
+        log.Printf("Failed to create connector: %v", err)
+        return
+    }
+
+    db, err := sql.OpenDB(connector)
+    if err != nil {
+        log.Printf("Failed to open database: %v", err)
+        return
+    }
+    defer db.Close()
+
+    err = db.Ping()
+    if err != nil {
+        log.Printf("Failed to ping ASE: %v", err)
+    }
+}
+```
+
+## Unit tests
+
+Unit tests for the packages are included in their respective directories
+and can be run using `go test`.
 
 ## Known Issues
 
@@ -57,6 +114,11 @@ For details on how to contribute please see the [contribution](CONTRIBUTING.md) 
 ## License
 
 Copyright (c) 2019-2020 SAP SE or an SAP affiliate company. All rights reserved.
-This file is licensed under the Apache License 2.0 except as noted otherwise in the [LICENSE file](LICENSE)
+This file is licensed under the Apache License 2.0 except as noted otherwise in the [LICENSE file](LICENSE).
 
+[cgo]: https://github.com/SAP/cgo-ase
+[go]: https://golang.org/
 [issues]: https://github.com/SAP/go-dblib/issues
+[pkg-database-sql]: https://golang.org/pkg/database/sql
+[purego]: https://github.com/SAP/go-ase
+[sap-ase]: https://www.sap.com/products/sybase-ase.html

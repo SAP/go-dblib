@@ -90,7 +90,7 @@ Contributions must fulfill following requirements to be accepted:
    explained in [effective go][effective-go]. The following points
    may formulate statements from effective go more strongly.
 2. All exported functions must be documented.
-4. Tests for new features or bugfixes must be added.
+3. Tests for new features or bugfixes must be added.
 
 [dco]: https://developercertificate.org/
 [effective-go]: https://golang.org/doc/effective_go.html
