@@ -4,8 +4,6 @@
 
 GO ?= go
 
-BINS ?= $(patsubst cmd/%,%,$(wildcard cmd/*))
-
 REUSE_ARGS = --skip-unrecognised --copyright='SAP SE' --license='Apache-2.0'
 
 generate:
@@ -23,15 +21,8 @@ endif
 	# licenses the go.sum modification can be reverted.
 	[ -d .git ] && git checkout -- go.sum
 
-LINT_DO_DIRS = $(shell go list -f '{{.Dir}}' ./... | grep -v $(LINT_IGNORE))
-
 lint:
-	golangci-lint run $(LINT_DO_DIRS)
-
-# lint-echo is used by github actions to lint the same files as
-# `make lint`.
-lint-dirs:
-	@echo $(LINT_DO_DIRS)
+	golangci-lint run ./...
 
 test:
 	$(GO) test -race -cover ./...
