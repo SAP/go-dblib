@@ -1,6 +1,6 @@
 module github.com/SAP/go-dblib
 
-go 1.14
+go 1.15
 
 require (
 	github.com/chzyer/logex v1.1.10 // indirect
