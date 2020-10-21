@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 SAP SE
+//
+// SPDX-License-Identifier: Apache-2.0
 module github.com/SAP/go-dblib
 
 go 1.15
