@@ -10,8 +10,12 @@ import (
 )
 
 //go:generate stringer -type=CapabilityType
+
+// CapabilityType is the type for valuemask values of a capability
+// type valuemask.
 type CapabilityType byte
 
+// Types of capabilities.
 const (
 	CapabilityRequest CapabilityType = iota + 1
 	CapabilityResponse
@@ -19,8 +23,12 @@ const (
 )
 
 //go:generate stringer -type=RequestCapability
+
+// RequestCapability is the type for valuemask values of a request
+// capability valuemask.
 type RequestCapability int
 
+// Types of request capabilities.
 const (
 	TDS_REQ_LANG RequestCapability = iota + 1
 	TDS_REQ_RPC
@@ -131,8 +139,12 @@ const (
 )
 
 //go:generate stringer -type=ResponseCapability
+
+// ResponseCapability is the type for valuemask values of a response
+// capability valuemask.
 type ResponseCapability int
 
+// Types of response capabilities.
 const (
 	TDS_RES_NOMSG ResponseCapability = iota + 1
 	TDS_RES_NOEED
@@ -209,15 +221,24 @@ const (
 	TDS_RES_DR_NOKILL
 )
 
+// SecurityCapability is the type for valuemask values of a security
+// capability valuemask.
 type SecurityCapability int
 
 // go:generate stringer -type=CapabilitySecurityValue
+
+// SecurityCapabilityValue is the type for valuemask values of a
+// security value valuemask.
 type CapabilitySecurityValue int
 
+// CapabilityPackage contains the map Capabilities that links
+// capability-types to a valuemask.
 type CapabilityPackage struct {
 	Capabilities map[CapabilityType]*valueMask
 }
 
+// NewCapabilityPackage creates a capability-package by setting request,
+// response, and security capabilities.
 func NewCapabilityPackage(request []RequestCapability, response []ResponseCapability,
 	security []SecurityCapability) (*CapabilityPackage, error) {
 	pkg := &CapabilityPackage{
@@ -248,34 +269,45 @@ func NewCapabilityPackage(request []RequestCapability, response []ResponseCapabi
 	return pkg, nil
 }
 
+// SetRequestCapability sets the requested capabilities.
 func (pkg *CapabilityPackage) SetRequestCapability(capability RequestCapability, enable bool) error {
 	return pkg.Capabilities[CapabilityRequest].setCapability(int(capability), enable)
 }
 
+// SetResponseCapability sets the response capabilities.
 func (pkg *CapabilityPackage) SetResponseCapability(capability ResponseCapability, enable bool) error {
 	return pkg.Capabilities[CapabilityResponse].setCapability(int(capability), enable)
 }
 
+// SetSecurityCapability sets the security capabilities.
 func (pkg *CapabilityPackage) SetSecurityCapability(capability SecurityCapability, enable bool) error {
 	return pkg.Capabilities[CapabilitySecurity].setCapability(int(capability), enable)
 }
 
+// HasCapabilities returns whether the package has the passed capability.
 func (pkg *CapabilityPackage) HasCapability(capabilityType CapabilityType, capability int) bool {
 	return pkg.Capabilities[capabilityType].getCapability(int(capability))
 }
 
+// HasRequestCapabilities returns whether the package has the passed
+// requested capability.
 func (pkg *CapabilityPackage) HasRequestCapability(capability RequestCapability) bool {
 	return pkg.HasCapability(CapabilityRequest, int(capability))
 }
 
+// HasResponseCapabilities returns whether the package has the passed
+// response capability.
 func (pkg *CapabilityPackage) HasResponseCapability(capability ResponseCapability) bool {
 	return pkg.HasCapability(CapabilityResponse, int(capability))
 }
 
+// HasSecurityCapabilities returns whether the package has the passed
+// security capability.
 func (pkg *CapabilityPackage) HasSecurityCapability(capability SecurityCapability) bool {
 	return pkg.HasCapability(CapabilitySecurity, int(capability))
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *CapabilityPackage) ReadFrom(ch BytesChannel) error {
 	totalLength, err := ch.Uint16()
 	if err != nil {
@@ -314,6 +346,7 @@ func (pkg *CapabilityPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg CapabilityPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_CAPABILITY)); err != nil {
 		return fmt.Errorf("failed to write token: %w", err)
@@ -374,8 +407,6 @@ func (pkg CapabilityPackage) WriteTo(ch BytesChannel) error {
 func (pkg CapabilityPackage) String() string {
 	return fmt.Sprintf("Capabilities: %#v", pkg.Capabilities)
 }
-
-// ValueMask
 
 var (
 	// Used to parse out value masks sent by Open Server applications
@@ -469,6 +500,7 @@ func parseValueMask(bs []byte) *valueMask {
 	return vm
 }
 
+// Bytes returns a byte-slice of valueMasks.
 func (vm valueMask) Bytes() []byte {
 	// Calculate how many bytes the value mask requires
 	max := int(math.Ceil(float64(len(vm.capabilities)) / 8))

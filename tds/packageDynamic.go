@@ -10,8 +10,12 @@ import (
 )
 
 //go:generate stringer -type=DynamicOperationType
+
+// DynamicOperationType is the type for valuemask values of
+// a dynamic-operation-package type.
 type DynamicOperationType byte
 
+// Types of a dynamic-operation-package.
 const (
 	TDS_DYN_INVALID    DynamicOperationType = 0x00
 	TDS_DYN_PREPARE    DynamicOperationType = 0x01
@@ -25,8 +29,12 @@ const (
 )
 
 //go:generate stringer -type=DynamicStatusType
+
+// DynamicStatusType is the type for valuemask values of
+// a dynamic-status-package type.
 type DynamicStatusType byte
 
+// Types of a dynamic-status-package.
 const (
 	TDS_DYNAMIC_UNUSED            DynamicStatusType = 0x00
 	TDS_DYNAMIC_HASARGS           DynamicStatusType = 0x01
@@ -35,6 +43,7 @@ const (
 	TDS_DYNAMIC_SUPPRESS_PARAMFMT DynamicStatusType = 0x08
 )
 
+// DynamicPackage contains information about the dynamic-package.
 type DynamicPackage struct {
 	Type   DynamicOperationType
 	Status DynamicStatusType
@@ -44,6 +53,7 @@ type DynamicPackage struct {
 	wide bool
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *DynamicPackage) ReadFrom(ch BytesChannel) error {
 	var totalLength int
 	var err error
@@ -117,6 +127,7 @@ func (pkg *DynamicPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg *DynamicPackage) WriteTo(ch BytesChannel) error {
 	if pkg.Type == TDS_DYN_INVALID {
 		return errors.New("dynamic type is invalid")

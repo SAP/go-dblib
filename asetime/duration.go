@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
+// ASEDuration is the reference time-unit as microseconds.
 type ASEDuration int
 
+// Base time-units in reference to ASEDuration.
 const (
 	Microsecond ASEDuration = 1
 	Millisecond             = 1000 * Microsecond
@@ -20,13 +22,25 @@ const (
 	Day                     = 24 * Hour
 )
 
-func (d ASEDuration) Days() int         { return int(d / Day) }
-func (d ASEDuration) Hours() int        { return int(d / Hour) }
-func (d ASEDuration) Minutes() int      { return int(d / Minute) }
-func (d ASEDuration) Seconds() int      { return int(d / Second) }
+// Days returns duration in days.
+func (d ASEDuration) Days() int { return int(d / Day) }
+
+// Hours returns duration in hours.
+func (d ASEDuration) Hours() int { return int(d / Hour) }
+
+// Minutes returns duration in minutes.
+func (d ASEDuration) Minutes() int { return int(d / Minute) }
+
+// Seconds returns duration in seconds.
+func (d ASEDuration) Seconds() int { return int(d / Second) }
+
+// Milliseconds returns duration in milliseconds.
 func (d ASEDuration) Milliseconds() int { return int(d / Millisecond) }
+
+// Microseconds returns duration in microseconds.
 func (d ASEDuration) Microseconds() int { return int(d) }
 
+// DurationFromDateTime returns duration based on passed time.Time.
 func DurationFromDateTime(t time.Time) ASEDuration {
 	y := int64(t.Year())
 	m := int64(t.Month())
@@ -42,6 +56,7 @@ func DurationFromDateTime(t time.Time) ASEDuration {
 	return ASEDuration(rataDie) + DurationFromTime(t)
 }
 
+// DurationFromTime returns duration based on passed time.Time.
 func DurationFromTime(t time.Time) ASEDuration {
 	hours := int64(time.Duration(t.Hour())*time.Hour) / 1000
 	minutes := int64(time.Duration(t.Minute())*time.Minute) / 1000
@@ -51,14 +66,19 @@ func DurationFromTime(t time.Time) ASEDuration {
 	return ASEDuration(hours + minutes + seconds + nanoseconds)
 }
 
+// DurationAsASEDuration returns type time.Duration as type ASEDuration.
 func DurationAsASEDuration(d time.Duration) ASEDuration {
 	return ASEDuration(d / 1000)
 }
 
+// FractionalSecondToMillisecond returns a fractional second as
+// millisecond.
 func FractionalSecondToMillisecond(s int) ASEDuration {
 	return ASEDuration(float64(s)*1000/300) * Millisecond
 }
 
+// MillisecondToFractionalSecond returns milliseconds as fractional
+// second.
 func MillisecondToFractionalSecond(s int) int {
 	return int(math.Round(float64(s) * 300 / 1000 / float64(Millisecond)))
 }

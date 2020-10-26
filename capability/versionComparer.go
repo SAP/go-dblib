@@ -10,9 +10,10 @@ import (
 
 // VersionComparer compares two versions and returns the following
 // values:
-// -1 when a is lower than b
-// 0 when a and b are equal
-// 1 when a is higher than b
+//
+//	-1 when a is lower than b
+//	 0 when a and b are equal
+//	 1 when a is higher than b
 type VersionComparer func(a, b string) (int, error)
 
 // VersionCompareSemantic is the default method used to compare

@@ -22,6 +22,7 @@ type Packet struct {
 	Data   []byte
 }
 
+// NewPacket creates a packet-struct.
 func NewPacket(packetSize int) *Packet {
 	packet := &Packet{}
 	packet.Header = NewPacketHeader(packetSize)
@@ -29,6 +30,7 @@ func NewPacket(packetSize int) *Packet {
 	return packet
 }
 
+// Bytes returns a byte-slice of a packet.
 func (packet Packet) Bytes() ([]byte, error) {
 	bs := make([]byte, int(packet.Header.Length))
 
@@ -40,6 +42,7 @@ func (packet Packet) Bytes() ([]byte, error) {
 	return bs, nil
 }
 
+// ReadFrom reads the packet-data and returns the amount of read bytes.
 func (packet *Packet) ReadFrom(ctx context.Context, reader io.Reader, timeout time.Duration) (int64, error) {
 	var totalBytes int64
 
@@ -107,6 +110,7 @@ func (packet *Packet) ReadFrom(ctx context.Context, reader io.Reader, timeout ti
 	return totalBytes, nil
 }
 
+// WriteTo writes a byte-slice and returns the amount of written bytes.
 func (packet Packet) WriteTo(writer io.Writer) (int64, error) {
 	bs, err := packet.Bytes()
 	if err != nil {

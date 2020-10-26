@@ -16,11 +16,14 @@ import (
 )
 
 var (
-	rl                 *readline.Instance
+	rl *readline.Instance
+	// PromptDatabaseName contains the used database name when using
+	// the prompt.
 	PromptDatabaseName string
 	promptMultiline    bool
 )
 
+// UpdatePrompt updates the displayed prompt in interactive use.
 func UpdatePrompt() {
 	prompt := "> "
 
@@ -37,6 +40,8 @@ func UpdatePrompt() {
 	}
 }
 
+// Repl is the interactive interface that reads, evaluates, and prints
+// the passed queries.
 func Repl(db *sql.DB) error {
 	var err error
 	rl, err = readline.New("")

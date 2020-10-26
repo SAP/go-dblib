@@ -14,6 +14,8 @@ import (
 	"github.com/SAP/go-dblib/asetime"
 )
 
+// Bytes returns a byte slice based on a given value-interface and depending
+// on the ASE data type.
 func (t DataType) Bytes(endian binary.ByteOrder, value interface{}) ([]byte, error) {
 	switch t {
 	case MONEY, SHORTMONEY:

@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// ReflectTypes maps the golang data type for the respective ASE data
+// type.
 var ReflectTypes = map[DataType]reflect.Type{
 	BIGDATETIMEN: reflect.TypeOf(time.Time{}),
 	BIGTIMEN:     reflect.TypeOf(time.Time{}),
@@ -60,6 +62,8 @@ var ReflectTypes = map[DataType]reflect.Type{
 	USER_UNITEXT: nil,
 }
 
+// GoReflectType returns the respective golang data type for given t ASE
+// data type.
 func (t DataType) GoReflectType() reflect.Type {
 	reflectType, ok := ReflectTypes[t]
 	if !ok {

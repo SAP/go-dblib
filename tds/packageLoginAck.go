@@ -7,14 +7,19 @@ package tds
 import "fmt"
 
 //go:generate stringer -type=LoginAckStatus
+
+// LoginAckStatus is the type for bitmask values of
+// a login-acknowledgment status.
 type LoginAckStatus uint8
 
+// States of a login-acknowledgment.
 const (
 	TDS_LOG_SUCCEED LoginAckStatus = 5 + iota
 	TDS_LOG_FAIL
 	TDS_LOG_NEGOTIATE
 )
 
+// LoginAckPackage contains information about the login-status.
 type LoginAckPackage struct {
 	Length         uint16
 	Status         LoginAckStatus
@@ -24,6 +29,7 @@ type LoginAckPackage struct {
 	ProgramVersion *Version
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *LoginAckPackage) ReadFrom(ch BytesChannel) error {
 	var err error
 
@@ -68,6 +74,7 @@ func (pkg *LoginAckPackage) ReadFrom(ch BytesChannel) error {
 	return err
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg LoginAckPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_LOGINACK)); err != nil {
 		return fmt.Errorf("failed to write TDS Token %s: %w", TDS_LOGINACK, err)

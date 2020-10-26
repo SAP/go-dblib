@@ -9,8 +9,11 @@ import (
 )
 
 //go:generate stringer -type=DoneState
+
+// DoneState is the type for bitmask values of a done-package state.
 type DoneState uint16
 
+// States of a done-package.
 const (
 	TDS_DONE_FINAL      DoneState = 0x0
 	TDS_DONE_MORE       DoneState = 0x1
@@ -24,8 +27,11 @@ const (
 )
 
 //go:generate stringer -type=TransState
+
+// TransState is the type for bitmask values of a trans-package state.
 type TransState uint16
 
+// States of a trans-package.
 const (
 	TDS_NOT_IN_TRAN      TransState = 0x0
 	TDS_TRAN_IN_PROGRESS TransState = 0x1
@@ -34,6 +40,8 @@ const (
 	TDS_TRAN_STMT_FAIL   TransState = 0x4
 )
 
+// DonePackage contains information about the states of a done- and
+// trans-package.
 type DonePackage struct {
 	Status    DoneState
 	TranState TransState
@@ -43,6 +51,7 @@ type DonePackage struct {
 type DoneProcPackage = DonePackage
 type DoneInProcPackage = DonePackage
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *DonePackage) ReadFrom(ch BytesChannel) error {
 	status, err := ch.Uint16()
 	if err != nil {
@@ -64,6 +73,7 @@ func (pkg *DonePackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg DonePackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_DONE)); err != nil {
 		return err

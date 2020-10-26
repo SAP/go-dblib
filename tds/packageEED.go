@@ -10,14 +10,18 @@ import (
 )
 
 //go:generate stringer -type=EEDStatus
+
+// EEDStatus is the type for bitmask values of an EED status.
 type EEDStatus uint8
 
+// States of an EED-package.
 const (
 	TDS_NO_EED      EEDStatus = 0x00
 	TDS_EED_FOLLOWS EEDStatus = 0x1
 	TDS_EED_INFO    EEDStatus = 0x2
 )
 
+// EEDPackage contains information about the EED.
 type EEDPackage struct {
 	MsgNumber  uint32
 	State      uint8
@@ -31,6 +35,7 @@ type EEDPackage struct {
 	LineNr     uint16
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *EEDPackage) ReadFrom(ch BytesChannel) error {
 	length, err := ch.Uint16()
 	if err != nil {
@@ -131,6 +136,7 @@ func (pkg *EEDPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg EEDPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_EED)); err != nil {
 		return fmt.Errorf("failed to write TDS Token %s: %w", TDS_EED, err)

@@ -10,6 +10,8 @@ import (
 	"reflect"
 )
 
+// ConvertValue converts a value-interface of an ASE data type into
+// a database/sql/driver.Value with the respective golang data type.
 func (t DataType) ConvertValue(v interface{}) (driver.Value, error) {
 	sv := reflect.ValueOf(v)
 

@@ -4,10 +4,12 @@
 
 package asetypes
 
-// DataType represents data types used in TDS-based applications.
 //go:generate stringer -type=DataType
+
+// DataType is the type for valuemask values of a data type valuemask.
 type DataType byte
 
+// ASE data types in a TDS-based application.
 const (
 	BIGDATETIMEN DataType = 0xBB
 	BIGTIMEN     DataType = 0xBC

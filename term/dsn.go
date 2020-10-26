@@ -29,6 +29,8 @@ func init() {
 	flag.Parse()
 }
 
+// Dsn sets dsn information from environment variables or flags
+// into a dsn.Info-struct.
 func Dsn() (*dsn.Info, error) {
 	dsn, err := dsn.NewInfoFromEnv("")
 	if err != nil {

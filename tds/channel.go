@@ -429,6 +429,7 @@ func isDoneFinal(pkg Package) (bool, error) {
 	return ok && done.Status == TDS_DONE_FINAL, nil
 }
 
+// LastPkgAcceptor is the interface providing the LastPkg method.
 type LastPkgAcceptor interface {
 	LastPkg(Package) error
 }

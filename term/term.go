@@ -17,6 +17,8 @@ var (
 	fInputFile = flag.String("f", "", "Read SQL commands from file")
 )
 
+// Entrypoint controls the execution of the program by starting the
+// interactive command-line or executing the passed query or input-file.
 func Entrypoint(db *sql.DB) error {
 	flag.Parse()
 

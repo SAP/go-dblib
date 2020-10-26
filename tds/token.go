@@ -5,8 +5,11 @@
 package tds
 
 //go:generate stringer -type=Token
+
+// Token is the type for bitmask values of a TDS-token.
 type Token byte
 
+// Types of TDS-tokens.
 const (
 	TDS_CURDECLARE3  Token = 0x10
 	TDS_PARAMFMT2    Token = 0x20

@@ -12,6 +12,8 @@ import (
 	"github.com/SAP/go-dblib/asetypes"
 )
 
+// Login uses a passed config to handle packages while logging in to the
+// server.
 func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 	if config == nil {
 		return errors.New("passed config is nil")

@@ -17,12 +17,16 @@ type Target struct {
 
 // Version is the interface that allows a Target to set capabilities.
 type Version interface {
+	// VersionString returns the version spec.
 	VersionString() string
+	// SetCapability sets the capability as enabled or disabled.
 	SetCapability(*Capability, bool)
+	// Has returns whether the capability is enabled or disabled.
 	Has(*Capability) bool
 }
 
-// Version returns a new version and calls .SetCapabilities with it.
+// Version returns a new version with passed specs and sets the
+// respective capabilities.
 func (target Target) Version(spec string) (Version, error) {
 	v := NewDefaultVersion(spec)
 
@@ -37,10 +41,12 @@ func (target Target) Version(spec string) (Version, error) {
 // its capabilities and their version ranges.
 //
 // An error is only returned in two cases:
+//
 // - VersionComparer cannot parse the version of Version.VersionString
-//   or the version of a lower/upper bound in a VersionRange.
+// or the version of a lower/upper bound in a VersionRange.
+//
 // - A VersionRange of a Capability has lower and upper bound set with
-//   the lower bound being equal or greater than the upper bound.
+// the lower bound being equal or greater than the upper bound.
 func (target Target) SetCapabilities(v Version) error {
 	cmpFn := target.VersionComparer
 	if cmpFn == nil {

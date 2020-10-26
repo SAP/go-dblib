@@ -46,13 +46,14 @@ type Conn struct {
 	packetSize int
 }
 
-// Dial returns a prepared and dialed Conn.
+// NewConn creates a Conn and opens channels.
 func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
 	network := "tcp"
 	if prop := dsn.Prop("network"); prop != "" {
 		network = prop
 	}
 
+	// Dial returns a prepared and dialed Conn.
 	c, err := net.Dial(network, fmt.Sprintf("%s:%s", dsn.Host, dsn.Port))
 	if err != nil {
 		return nil, fmt.Errorf("error opening connection: %w", err)
@@ -173,10 +174,13 @@ func (tds *Conn) Close() error {
 	return me
 }
 
+// PacketSize returns the negotiated packet size.
 func (tds Conn) PacketSize() int {
 	return tds.packetSize
 }
 
+// PacketBodySize returns the negotiated packet size minus the packet
+// header size.
 func (tds Conn) PacketBodySize() int {
 	return tds.packetSize - PacketHeaderSize
 }

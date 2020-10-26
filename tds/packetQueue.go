@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// Interface satisfaction check.
 var _ BytesChannel = (*PacketQueue)(nil)
 
 // PacketQueue is loosely modeled after bytes.Buffer.
@@ -108,6 +109,7 @@ func (queue *PacketQueue) DiscardUntilCurrentPosition() {
 	}
 }
 
+// AllPacketsConsumend returns true if all packets have been consumed.
 func (queue *PacketQueue) AllPacketsConsumed() bool {
 	if len(queue.queue) == 0 && queue.indexPacket == 0 && queue.indexData == 0 {
 		// No packets in queue also means that all packets have been
@@ -122,18 +124,20 @@ func (queue *PacketQueue) AllPacketsConsumed() bool {
 	return queue.indexPacket == len(queue.queue)-1 && queue.indexData == len(queue.queue[queue.indexPacket].Data)
 }
 
+// IsEOM returns true if all packets have been consumed and it is the
+// end of the message.
 func (queue *PacketQueue) IsEOM() bool {
 	return queue.AllPacketsConsumed() && queue.recvEOM
 }
 
-// Read satisfies the io.Reader interface
+// Read satisfies the io.Reader interface.
 func (queue *PacketQueue) Read(p []byte) (int, error) {
 	var err error
 	p, err = queue.Bytes(len(p))
 	return len(p), err
 }
 
-// Write satisfies the io.Writer interface
+// Write satisfies the io.Writer interface.
 func (queue *PacketQueue) Write(p []byte) (int, error) {
 	return len(p), queue.WriteBytes(p)
 }
@@ -193,51 +197,61 @@ func (queue *PacketQueue) Bytes(n int) ([]byte, error) {
 	return bs, nil
 }
 
+// Byte implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Byte() (byte, error) {
 	bs, err := queue.Bytes(1)
 	return bs[0], err
 }
 
+// Uint8 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Uint8() (uint8, error) {
 	b, err := queue.Byte()
 	return uint8(b), err
 }
 
+// Int8 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Int8() (int8, error) {
 	b, err := queue.Byte()
 	return int8(b), err
 }
 
+// Uint16 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Uint16() (uint16, error) {
 	bs, err := queue.Bytes(2)
 	return endian.Uint16(bs), err
 }
 
+// Int16 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Int16() (int16, error) {
 	i, err := queue.Uint16()
 	return int16(i), err
 }
 
+// Uint32 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Uint32() (uint32, error) {
 	bs, err := queue.Bytes(4)
 	return endian.Uint32(bs), err
 }
 
+// Int32 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Int32() (int32, error) {
 	i, err := queue.Uint32()
 	return int32(i), err
 }
 
+// Uint64 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Uint64() (uint64, error) {
 	bs, err := queue.Bytes(8)
 	return endian.Uint64(bs), err
 }
 
+// Int64 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) Int64() (int64, error) {
 	i, err := queue.Uint64()
 	return int64(i), err
 }
 
+// String implements the tds.BytesChannel interface.
 func (queue *PacketQueue) String(size int) (string, error) {
 	bs, err := queue.Bytes(size)
 	return string(bs), err
@@ -292,48 +306,58 @@ func (queue *PacketQueue) WriteBytes(bs []byte) error {
 	return nil
 }
 
+// WriteByte implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteByte(b byte) error {
 	return queue.WriteBytes([]byte{b})
 }
 
+// WriteUint8 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteUint8(i uint8) error {
 	return queue.WriteByte(byte(i))
 }
 
+// WriteInt8 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteInt8(i int8) error {
 	return queue.WriteUint8(uint8(i))
 }
 
+// WriteUint16 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteUint16(i uint16) error {
 	bs := make([]byte, 2)
 	endian.PutUint16(bs, i)
 	return queue.WriteBytes(bs)
 }
 
+// WriteInt16 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteInt16(i int16) error {
 	return queue.WriteUint16(uint16(i))
 }
 
+// WriteUint32 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteUint32(i uint32) error {
 	bs := make([]byte, 4)
 	endian.PutUint32(bs, i)
 	return queue.WriteBytes(bs)
 }
 
+// WriteInt32 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteInt32(i int32) error {
 	return queue.WriteUint32(uint32(i))
 }
 
+// WriteUint64 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteUint64(i uint64) error {
 	bs := make([]byte, 8)
 	endian.PutUint64(bs, i)
 	return queue.WriteBytes(bs)
 }
 
+// WriteInt64 implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteInt64(i int64) error {
 	return queue.WriteUint64(uint64(i))
 }
 
+// WriteString implements the tds.BytesChannel interface.
 func (queue *PacketQueue) WriteString(s string) error {
 	return queue.WriteBytes([]byte(s))
 }

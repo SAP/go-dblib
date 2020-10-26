@@ -2,5 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// term contains common code for interactive database clients.
+// The package term contains common code for interactive database
+// clients.
 package term

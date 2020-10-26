@@ -8,9 +8,15 @@ import (
 	"fmt"
 )
 
+// Interface satisfaction check.
+var _ Package = (*OptionCmdPackage)(nil)
+
 //go:generate stringer -type=OptionCmd
+
+// OptionCmd is the type for bitmask values of an option-command.
 type OptionCmd uint
 
+// Commands of an option-command.
 const (
 	TDS_OPT_SET OptionCmd = iota + 1
 	TDS_OPT_DEFAULT
@@ -19,8 +25,12 @@ const (
 )
 
 //go:generate stringer -type=OptionCmdOption
+
+// OptionCmdOption is the type for bitmask values of an option-command
+// option.
 type OptionCmdOption uint
 
+// Options of an option-command.
 const (
 	TDS_OPT_UNUSED OptionCmdOption = iota
 	TDS_OPT_DATEFIRST
@@ -75,8 +85,7 @@ const (
 	TDS_OPT_ISOLATION_MODE OptionCmdOption = iota + 52
 )
 
-var _ Package = (*OptionCmdPackage)(nil)
-
+// OptionCmdPackage contains the command, option and argument.
 type OptionCmdPackage struct {
 	Cmd    OptionCmd
 	Option OptionCmdOption
@@ -84,6 +93,7 @@ type OptionCmdPackage struct {
 	OptionArg []byte
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *OptionCmdPackage) ReadFrom(ch BytesChannel) error {
 	if _, err := ch.Uint16(); err != nil {
 		return ErrNotEnoughBytes
@@ -114,6 +124,7 @@ func (pkg *OptionCmdPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg OptionCmdPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_OPTIONCMD)); err != nil {
 		return err

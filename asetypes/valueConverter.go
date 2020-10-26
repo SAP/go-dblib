@@ -10,10 +10,14 @@ import (
 	"reflect"
 )
 
+// ValueConverter implements the driver.types.ValueConverter interface.
 type ValueConverter struct{}
 
+// DefaultValueConverter implements the driver.types.ValueConverter
+// interface.
 var DefaultValueConverter ValueConverter
 
+// ConvertValue implements the driver.types.ValueConverter interface.
 func (conv ValueConverter) ConvertValue(v interface{}) (driver.Value, error) {
 	// Check the default value converter
 	if driver.IsValue(v) {

@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// Default properties for ASE data type 'decimal'.
 const (
 	ASEDecimalDefaultPrecision = 18
 	ASEDecimalDefaultScale     = 0
@@ -24,6 +25,7 @@ const (
 	aseMaxDecimalDigits = 38
 )
 
+// Errors of ASE data type 'decimal' operations.
 var (
 	ErrDecimalPrecisionTooHigh         = fmt.Errorf("precision is set to more than %d digits", aseMaxDecimalDigits)
 	ErrDecimalPrecisionTooLow          = fmt.Errorf("precision is set to less than 0 digits")
@@ -122,6 +124,7 @@ func (dec Decimal) sanity() error {
 	return nil
 }
 
+// Cmp compares precision, scale, and value between two decimals.
 func (dec Decimal) Cmp(other Decimal) bool {
 	if dec.Precision != other.Precision {
 		return false
@@ -134,22 +137,27 @@ func (dec Decimal) Cmp(other Decimal) bool {
 	return dec.i.Cmp(other.i) == 0
 }
 
+// IsNegative returns true if dec is negative.
 func (dec Decimal) IsNegative() bool {
 	return dec.i.Sign() < 0
 }
 
+// Negate sets dec to the value of it with its sign negated.
 func (dec *Decimal) Negate() {
 	dec.i.Neg(dec.i)
 }
 
+// Bytes returns the byte-slice of dec.
 func (dec Decimal) Bytes() []byte {
 	return dec.i.Bytes()
 }
 
+// ByteSize calls DecimalByteSize.
 func (dec Decimal) ByteSize() int {
 	return DecimalByteSize(dec.Precision)
 }
 
+// SetInt64 sets dec.i to i.
 func (dec *Decimal) SetInt64(i int64) {
 	if dec.i == nil {
 		dec.i = &big.Int{}
@@ -165,6 +173,8 @@ func (dec Decimal) Int() *big.Int {
 	return i
 }
 
+// SetBytes interprets b as the bytes of a big-endian unsigned integer
+// and sets dec to that values.
 func (dec *Decimal) SetBytes(b []byte) {
 	if dec.i == nil {
 		dec.i = &big.Int{}

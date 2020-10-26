@@ -13,6 +13,18 @@
 // Note: The data types are embedded instead of aliased to provide the
 // methods of the embedded types - aliasing does not provide access to
 // the methods of the source type.
+//
+// File-Structure:
+// - Format and data status
+// - Interfaces
+// - Base structs and methods: fieldFmtBase, fieldDataBase
+// - Implementations (Derived structs and methods):
+//   - fieldFmtLength, fieldData
+//   - fieldFmtLengthScale, fieldData
+//   - fieldFmtLengthPrecisionScale, fieldDataPrecisionScale
+//   - fieldFmtBlob, fieldDataBlob
+//   - fieldFmtTxtPtr, fieldDataTxtPtr
+// - Utility-functions
 
 package tds
 
@@ -21,6 +33,8 @@ import (
 
 	"github.com/SAP/go-dblib/asetypes"
 )
+
+// Format and data status
 
 // Both Param- and RowFmtStatus are uints communicated using
 // TDS_PARAMFMT* and TDS_ROWFMT*. Depending on the token they have
@@ -38,6 +52,8 @@ const (
 )
 
 //go:generate stringer -type=ParamFmtStatus
+
+// ParamFmtStatus is the type for bitmask values of a ParamFmt status.
 type ParamFmtStatus uint
 
 const (
@@ -48,6 +64,8 @@ const (
 )
 
 //go:generate stringer -type=RowFmtStatus
+
+// RowFmtStatus is the type for bitmask values of a RowFmt status.
 type RowFmtStatus uint
 
 const (
@@ -62,6 +80,7 @@ const (
 	TDS_ROW_PADCHAR      RowFmtStatus = 0x80
 )
 
+// DataStatus is the type for bitmask values of a data status.
 type DataStatus uint
 
 const (
@@ -73,6 +92,11 @@ const (
 
 // Interfaces
 
+// FieldFmt is the interface providing the ReadFrom- and WriteTo-method
+// to read from or write to a field by communicating format information
+// through the tds-protocol from or to a server.
+//
+// Additionally, several Setter- and Getter-methods are provided.
 type FieldFmt interface {
 	// Format information as sent to or received from TDS server
 	DataType() asetypes.DataType
@@ -115,12 +139,24 @@ type FieldFmt interface {
 	MaxLength() int64
 	setMaxLength(int64)
 
+	// ReadFrom reads bytes from the passed channel until either the
+	// channel is closed or the package has all required information.
+	// The read bytes are usually stored in fieldFmt* structs.
 	ReadFrom(BytesChannel) (int, error)
+	// WriteTo writes bytes to the passed channel until either the
+	// channel is closed or the package has written all required
+	// information. The information are usually based on fieldFmt*
+	// structs.
 	WriteTo(BytesChannel) (int, error)
 
 	FormatByteLength() int
 }
 
+// FieldData is the interface providing the ReadFrom- and WriteTo-method
+// to read from or write to a field by communicating data through the tds-
+// protocol from or to a server.
+//
+// Additionally, several Setter- and Getter-methods are provided.
 type FieldData interface {
 	// Format information send by TDS server
 	Status() DataStatus
@@ -128,14 +164,22 @@ type FieldData interface {
 	// Interface methods for go-ase
 	Format() FieldFmt
 	setFormat(FieldFmt)
+
+	// ReadFrom reads bytes from the passed channel until either the
+	// channel is closed or the package has all required information.
+	// The read bytes are usually stored in fieldData* structs.
 	ReadFrom(BytesChannel) (int, error)
+	// WriteTo writes bytes to the passed channel until either the
+	// channel is closed or the package has written all required
+	// information. The information are usually based on fieldData*
+	// structs.
 	WriteTo(BytesChannel) (int, error)
 
 	Value() interface{}
 	SetValue(interface{})
 }
 
-// Base structs
+// Base structs and methods
 
 type fieldFmtBase struct {
 	dataType asetypes.DataType
@@ -158,6 +202,7 @@ type fieldFmtBase struct {
 	maxLength int64
 }
 
+// DataType implements the tds.FieldFmt interface.
 func (field fieldFmtBase) DataType() asetypes.DataType {
 	return field.dataType
 }
@@ -166,74 +211,92 @@ func (field *fieldFmtBase) setDataType(t asetypes.DataType) {
 	field.dataType = t
 }
 
+// SetName implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetName(name string) {
 	field.name = name
 }
 
+// Name implements the tds.FieldFmt interface.
 func (field fieldFmtBase) Name() string {
 	return field.name
 }
 
+// SetColumnLabel implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetColumnLabel(columnLabel string) {
 	field.columnLabel = columnLabel
 }
 
+// ColumnLabel implements the tds.FieldFmt interface.
 func (field fieldFmtBase) ColumnLabel() string {
 	return field.columnLabel
 }
 
+// SetCatalogue implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetCatalogue(catalogue string) {
 	field.catalogue = catalogue
 }
 
+// Catalogue implements the tds.FieldFmt interface.
 func (field fieldFmtBase) Catalogue() string {
 	return field.catalogue
 }
 
+// SetSchema implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetSchema(schema string) {
 	field.schema = schema
 }
 
+// Schema implements the tds.FieldFmt interface.
 func (field fieldFmtBase) Schema() string {
 	return field.schema
 }
 
+// SetTable implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetTable(table string) {
 	field.table = table
 }
 
+// Table implements the tds.FieldFmt interface.
 func (field fieldFmtBase) Table() string {
 	return field.table
 }
 
+// SetStatus implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetStatus(status uint) {
 	field.status = fmtStatus(status)
 }
 
+// Status implements the tds.FieldFmt interface.
 func (field fieldFmtBase) Status() uint {
 	return uint(field.status)
 }
 
+// SetUserType implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetUserType(userType int32) {
 	field.userType = userType
 }
 
+// UserType implements the tds.FieldFmt interface.
 func (field fieldFmtBase) UserType() int32 {
 	return field.userType
 }
 
+// SetLocaleInfo implements the tds.FieldFmt interface.
 func (field *fieldFmtBase) SetLocaleInfo(localeInfo string) {
 	field.localeInfo = localeInfo
 }
 
+// LocaleInfo implements the tds.FieldFmt interface.
 func (field fieldFmtBase) LocaleInfo() string {
 	return field.localeInfo
 }
 
+// IsFixedLength implements the tds.FieldFmt interface.
 func (field fieldFmtBase) IsFixedLength() bool {
 	return field.DataType().ByteSize() != -1
 }
 
+// LengthBytes implements the tds.FieldFmt interface.
 func (field fieldFmtBase) LengthBytes() int {
 	if field.IsFixedLength() {
 		return field.DataType().ByteSize()
@@ -246,6 +309,7 @@ func (field fieldFmtBase) setMaxLength(i int64) {
 	field.maxLength = i
 }
 
+// MaxLength implements the tds.FieldFmt interface.
 func (field fieldFmtBase) MaxLength() int64 {
 	return field.maxLength
 }
@@ -272,54 +336,6 @@ func (field fieldFmtBase) writeToBase(ch BytesChannel) (int, error) {
 	return field.LengthBytes(), writeLengthBytes(ch, field.LengthBytes(), field.MaxLength())
 }
 
-type fieldFmtBasePrecision struct {
-	precision uint8
-}
-
-func (field fieldFmtBasePrecision) Precision() uint8 {
-	return field.precision
-}
-
-func (field *fieldFmtBasePrecision) readFromPrecision(ch BytesChannel) (int, error) {
-	var err error
-	field.precision, err = ch.Uint8()
-	if err != nil {
-		return 0, ErrNotEnoughBytes
-	}
-	return 1, nil
-}
-
-func (field fieldFmtBasePrecision) writeToPrecision(ch BytesChannel) (int, error) {
-	if err := ch.WriteUint8(field.precision); err != nil {
-		return 0, fmt.Errorf("failed to write precision: %w", err)
-	}
-	return 1, nil
-}
-
-type fieldFmtBaseScale struct {
-	scale uint8
-}
-
-func (field fieldFmtBaseScale) Scale() uint8 {
-	return field.scale
-}
-
-func (field *fieldFmtBaseScale) readFromScale(ch BytesChannel) (int, error) {
-	var err error
-	field.scale, err = ch.Uint8()
-	if err != nil {
-		return 0, ErrNotEnoughBytes
-	}
-	return 1, nil
-}
-
-func (field fieldFmtBaseScale) writeToScale(ch BytesChannel) (int, error) {
-	if err := ch.WriteUint8(field.scale); err != nil {
-		return 0, fmt.Errorf("failed to write scale: %w", err)
-	}
-	return 1, nil
-}
-
 type fieldDataBase struct {
 	fmt    FieldFmt
 	status DataStatus
@@ -330,19 +346,23 @@ func (field *fieldDataBase) setFormat(f FieldFmt) {
 	field.fmt = f
 }
 
+// Format implements the tds.FieldData interface.
 func (field fieldDataBase) Format() FieldFmt {
 	return field.fmt
 }
 
+// Status implements the tds.FieldData interface.
 func (field fieldDataBase) Status() DataStatus {
 	return field.status
 }
 
+// Value implements the tds.FieldData interface.
 func (field *fieldDataBase) Value() interface{} {
 	// TODO set a default?
 	return field.value
 }
 
+// SetValue implements the tds.FieldData interface.
 func (field *fieldDataBase) SetValue(value interface{}) {
 	field.value = value
 }
@@ -431,13 +451,13 @@ func (field fieldDataBase) writeTo(ch BytesChannel) (int, error) {
 	return n, nil
 }
 
-// Implementations
+// Implementations: fieldFmtLength, fieldData
 
 type fieldFmtLength struct {
 	fieldFmtBase
 }
 
-// TODO is this being used?
+// FormatByteLength implements the tds.FieldFmt interface.
 func (field fieldFmtLength) FormatByteLength() int {
 	if field.IsFixedLength() {
 		return 0
@@ -446,10 +466,12 @@ func (field fieldFmtLength) FormatByteLength() int {
 	return field.LengthBytes()
 }
 
+// ReadFrom implements the tds.FieldFmt interface.
 func (field *fieldFmtLength) ReadFrom(ch BytesChannel) (int, error) {
 	return field.readFromBase(ch)
 }
 
+// WriteTo implements the tds.FieldFmt interface.
 func (field fieldFmtLength) WriteTo(ch BytesChannel) (int, error) {
 	return field.writeToBase(ch)
 }
@@ -488,185 +510,14 @@ type TimeNFieldFmt struct{ fieldFmtLength }
 type VarBinaryFieldFmt struct{ fieldFmtLength }
 type VarCharFieldFmt struct{ fieldFmtLength }
 
-type fieldFmtLengthScale struct {
-	fieldFmtBase
-	fieldFmtBaseScale
-}
-
-func (field fieldFmtLengthScale) FormatByteLength() int {
-	// 1 byte scale
-	// 1 to 4 bytes length
-	return 1 + field.LengthBytes()
-}
-
-func (field *fieldFmtLengthScale) ReadFrom(ch BytesChannel) (int, error) {
-	n, err := field.readFromBase(ch)
-	if err != nil {
-		return n, err
-	}
-
-	n2, err := field.readFromScale(ch)
-	return n + n2, err
-}
-
-func (field fieldFmtLengthScale) WriteTo(ch BytesChannel) (int, error) {
-	n, err := field.writeToBase(ch)
-	if err != nil {
-		return n, err
-	}
-
-	n2, err := field.writeToScale(ch)
-	return n + n2, err
-}
-
-type BigDateTimeNFieldFmt struct{ fieldFmtLengthScale }
-type BigTimeNFieldFmt struct{ fieldFmtLengthScale }
-
-type fieldFmtLengthPrecisionScale struct {
-	fieldFmtBase
-	fieldFmtBasePrecision
-	fieldFmtBaseScale
-}
-
-func (field fieldFmtLengthPrecisionScale) FormatByteLength() int {
-	return 2 + field.LengthBytes()
-}
-
-func (field *fieldFmtLengthPrecisionScale) ReadFrom(ch BytesChannel) (int, error) {
-	n, err := field.readFromBase(ch)
-	if err != nil {
-		return n, err
-	}
-
-	n2, err := field.readFromPrecision(ch)
-	if err != nil {
-		return n + n2, err
-	}
-
-	n3, err := field.readFromScale(ch)
-	return n + n2 + n3, err
-}
-
-func (field fieldFmtLengthPrecisionScale) WriteTo(ch BytesChannel) (int, error) {
-	n, err := field.writeToBase(ch)
-	if err != nil {
-		return n, err
-	}
-
-	n2, err := field.writeToPrecision(ch)
-	if err != nil {
-		return n + n2, err
-	}
-
-	n3, err := field.writeToScale(ch)
-	return n + n2 + n3, err
-}
-
-type DecNFieldFmt struct{ fieldFmtLengthPrecisionScale }
-type NumNFieldFmt struct{ fieldFmtLengthPrecisionScale }
-
-//go:generate stringer -type=BlobType
-type BlobType uint8
-
-const (
-	TDS_BLOB_FULLCLASSNAME BlobType = 0x01
-	TDS_BLOB_DBID_CLASSDEF BlobType = 0x02
-	TDS_BLOB_CHAR          BlobType = 0x03
-	TDS_BLOB_BINARY        BlobType = 0x04
-	TDS_BLOB_UNICHAR       BlobType = 0x05
-	TDS_LOBLOC_CHAR        BlobType = 0x06
-	TDS_LOBLOC_BINARY      BlobType = 0x07
-	TDS_LOBLOC_UNICHAR     BlobType = 0x08
-)
-
-//go:generate stringer -type=BlobSerializationType
-type BlobSerializationType uint8
-
-const (
-	NativeJavaSerialization BlobSerializationType = iota
-	NativeCharacterFormat
-	BinaryData
-	UnicharUTF16
-	UnicharUTF8
-	UnicharSCSU
-)
-
-type fieldFmtBlob struct {
-	fieldFmtBase
-	blobType BlobType
-	classID  string
-}
-
-func (field fieldFmtBlob) FormatByteLength() int {
-	return 1 + 1 + len(field.classID) + field.LengthBytes()
-}
-
-func (field *fieldFmtBlob) ReadFrom(ch BytesChannel) (int, error) {
-	n, err := field.readFromBase(ch)
-	if err != nil {
-		return n, err
-	}
-
-	blobType, err := ch.Uint8()
-	if err != nil {
-		return 0, ErrNotEnoughBytes
-	}
-	field.blobType = BlobType(blobType)
-	n++
-
-	if field.blobType == TDS_BLOB_FULLCLASSNAME || field.blobType == TDS_BLOB_DBID_CLASSDEF {
-		classIdLength, err := ch.Uint16()
-		if err != nil {
-			return 0, ErrNotEnoughBytes
-		}
-		n += 2
-
-		field.classID, err = ch.String(int(classIdLength))
-		if err != nil {
-			return 0, ErrNotEnoughBytes
-		}
-		n += int(classIdLength)
-	}
-
-	return n, nil
-}
-
-func (field fieldFmtBlob) WriteTo(ch BytesChannel) (int, error) {
-	n, err := field.writeToBase(ch)
-	if err != nil {
-		return n, err
-	}
-
-	if err := ch.WriteUint8(uint8(field.blobType)); err != nil {
-		return n, fmt.Errorf("failed to write blobtype: %w", err)
-	}
-	n++
-
-	if field.blobType == TDS_BLOB_FULLCLASSNAME || field.blobType == TDS_BLOB_DBID_CLASSDEF {
-		if err := ch.WriteUint16(uint16(len(field.classID))); err != nil {
-			return n, fmt.Errorf("failed to write ClassID length: %w", err)
-		}
-		n += 2
-
-		if len(field.classID) > 0 {
-			if err := ch.WriteString(field.classID); err != nil {
-				return n, fmt.Errorf("failed to write ClassID: %w", err)
-			}
-			n += len(field.classID)
-		}
-	}
-
-	return n, nil
-}
-
-type BlobFieldFmt struct{ fieldFmtBlob }
-
 type fieldData struct{ fieldDataBase }
 
+// ReadFrom implements the tds.FieldData interface.
 func (field *fieldData) ReadFrom(ch BytesChannel) (int, error) {
 	return field.readFrom(ch)
 }
 
+// WriteTo implements the tds.FieldData interface.
 func (field fieldData) WriteTo(ch BytesChannel) (int, error) {
 	return field.writeTo(ch)
 }
@@ -704,13 +555,153 @@ type SensitivityFieldData struct{ fieldData }
 type TimeNFieldData struct{ fieldData }
 type VarBinaryFieldData struct{ fieldData }
 type VarCharFieldData struct{ fieldData }
+
+// Implementations: fieldFmtLengthScale, fieldData
+
+type fieldFmtBaseScale struct {
+	scale uint8
+}
+
+// Scale returns the scale stored in a field format.
+func (field fieldFmtBaseScale) Scale() uint8 {
+	return field.scale
+}
+
+func (field *fieldFmtBaseScale) readFromScale(ch BytesChannel) (int, error) {
+	var err error
+	field.scale, err = ch.Uint8()
+	if err != nil {
+		return 0, ErrNotEnoughBytes
+	}
+	return 1, nil
+}
+
+func (field fieldFmtBaseScale) writeToScale(ch BytesChannel) (int, error) {
+	if err := ch.WriteUint8(field.scale); err != nil {
+		return 0, fmt.Errorf("failed to write scale: %w", err)
+	}
+	return 1, nil
+}
+
+type fieldFmtLengthScale struct {
+	fieldFmtBase
+	fieldFmtBaseScale
+}
+
+// FormatByteLength implements the tds.FieldFmt interface.
+func (field fieldFmtLengthScale) FormatByteLength() int {
+	// 1 byte scale
+	// 1 to 4 bytes length
+	return 1 + field.LengthBytes()
+}
+
+// ReadFrom implements the tds.FieldFmt interface.
+func (field *fieldFmtLengthScale) ReadFrom(ch BytesChannel) (int, error) {
+	n, err := field.readFromBase(ch)
+	if err != nil {
+		return n, err
+	}
+
+	n2, err := field.readFromScale(ch)
+	return n + n2, err
+}
+
+// WriteTo implements the tds.FieldFmt interface.
+func (field fieldFmtLengthScale) WriteTo(ch BytesChannel) (int, error) {
+	n, err := field.writeToBase(ch)
+	if err != nil {
+		return n, err
+	}
+
+	n2, err := field.writeToScale(ch)
+	return n + n2, err
+}
+
+type BigDateTimeNFieldFmt struct{ fieldFmtLengthScale }
+type BigTimeNFieldFmt struct{ fieldFmtLengthScale }
+
 type BigDateTimeNFieldData struct{ fieldData }
 type BigTimeNFieldData struct{ fieldData }
+
+// Implementations: fieldFmtLengthPrecisionScale,
+//                  fieldDataPrecisionScale
+
+type fieldFmtBasePrecision struct {
+	precision uint8
+}
+
+// Precision returns the precision stored in a field format.
+func (field fieldFmtBasePrecision) Precision() uint8 {
+	return field.precision
+}
+
+func (field *fieldFmtBasePrecision) readFromPrecision(ch BytesChannel) (int, error) {
+	var err error
+	field.precision, err = ch.Uint8()
+	if err != nil {
+		return 0, ErrNotEnoughBytes
+	}
+	return 1, nil
+}
+
+func (field fieldFmtBasePrecision) writeToPrecision(ch BytesChannel) (int, error) {
+	if err := ch.WriteUint8(field.precision); err != nil {
+		return 0, fmt.Errorf("failed to write precision: %w", err)
+	}
+	return 1, nil
+}
+
+type fieldFmtLengthPrecisionScale struct {
+	fieldFmtBase
+	fieldFmtBasePrecision
+	fieldFmtBaseScale
+}
+
+// FormatByteLength implements the tds.FieldFmt interface.
+func (field fieldFmtLengthPrecisionScale) FormatByteLength() int {
+	return 2 + field.LengthBytes()
+}
+
+// ReadFrom implements the tds.FieldFmt interface.
+func (field *fieldFmtLengthPrecisionScale) ReadFrom(ch BytesChannel) (int, error) {
+	n, err := field.readFromBase(ch)
+	if err != nil {
+		return n, err
+	}
+
+	n2, err := field.readFromPrecision(ch)
+	if err != nil {
+		return n + n2, err
+	}
+
+	n3, err := field.readFromScale(ch)
+	return n + n2 + n3, err
+}
+
+// WriteTo implements the tds.FieldFmt interface.
+func (field fieldFmtLengthPrecisionScale) WriteTo(ch BytesChannel) (int, error) {
+	n, err := field.writeToBase(ch)
+	if err != nil {
+		return n, err
+	}
+
+	n2, err := field.writeToPrecision(ch)
+	if err != nil {
+		return n + n2, err
+	}
+
+	n3, err := field.writeToScale(ch)
+	return n + n2 + n3, err
+}
+
+type DecNFieldFmt struct{ fieldFmtLengthPrecisionScale }
+type NumNFieldFmt struct{ fieldFmtLengthPrecisionScale }
 
 type fieldDataPrecisionScale struct {
 	fieldData
 }
 
+// ReadFrom implements the tds.FieldData interface.
 func (field *fieldDataPrecisionScale) ReadFrom(ch BytesChannel) (int, error) {
 	n, err := field.readFrom(ch)
 	if err != nil {
@@ -739,6 +730,112 @@ func (field *fieldDataPrecisionScale) ReadFrom(ch BytesChannel) (int, error) {
 type DecNFieldData struct{ fieldDataPrecisionScale }
 type NumNFieldData struct{ fieldDataPrecisionScale }
 
+// Implementations: fieldFmtBlob, fieldDataBlob
+
+//go:generate stringer -type=BlobType
+
+// BlobType is the type for bitmask values of a blob types.
+type BlobType uint8
+
+const (
+	TDS_BLOB_FULLCLASSNAME BlobType = 0x01
+	TDS_BLOB_DBID_CLASSDEF BlobType = 0x02
+	TDS_BLOB_CHAR          BlobType = 0x03
+	TDS_BLOB_BINARY        BlobType = 0x04
+	TDS_BLOB_UNICHAR       BlobType = 0x05
+	TDS_LOBLOC_CHAR        BlobType = 0x06
+	TDS_LOBLOC_BINARY      BlobType = 0x07
+	TDS_LOBLOC_UNICHAR     BlobType = 0x08
+)
+
+//go:generate stringer -type=BlobSerializationType
+
+// BlobSerializationType is the type for bitmask values of a blob
+// serialization-types.
+type BlobSerializationType uint8
+
+const (
+	NativeJavaSerialization BlobSerializationType = iota
+	NativeCharacterFormat
+	BinaryData
+	UnicharUTF16
+	UnicharUTF8
+	UnicharSCSU
+)
+
+type fieldFmtBlob struct {
+	fieldFmtBase
+	blobType BlobType
+	classID  string
+}
+
+// FormatByteLength implements the tds.FieldFmt interface.
+func (field fieldFmtBlob) FormatByteLength() int {
+	return 1 + 1 + len(field.classID) + field.LengthBytes()
+}
+
+// ReadFrom implements the tds.FieldFmt interface.
+func (field *fieldFmtBlob) ReadFrom(ch BytesChannel) (int, error) {
+	n, err := field.readFromBase(ch)
+	if err != nil {
+		return n, err
+	}
+
+	blobType, err := ch.Uint8()
+	if err != nil {
+		return 0, ErrNotEnoughBytes
+	}
+	field.blobType = BlobType(blobType)
+	n++
+
+	if field.blobType == TDS_BLOB_FULLCLASSNAME || field.blobType == TDS_BLOB_DBID_CLASSDEF {
+		classIdLength, err := ch.Uint16()
+		if err != nil {
+			return 0, ErrNotEnoughBytes
+		}
+		n += 2
+
+		field.classID, err = ch.String(int(classIdLength))
+		if err != nil {
+			return 0, ErrNotEnoughBytes
+		}
+		n += int(classIdLength)
+	}
+
+	return n, nil
+}
+
+// WriteTo implements the tds.FieldFmt interface.
+func (field fieldFmtBlob) WriteTo(ch BytesChannel) (int, error) {
+	n, err := field.writeToBase(ch)
+	if err != nil {
+		return n, err
+	}
+
+	if err := ch.WriteUint8(uint8(field.blobType)); err != nil {
+		return n, fmt.Errorf("failed to write blobtype: %w", err)
+	}
+	n++
+
+	if field.blobType == TDS_BLOB_FULLCLASSNAME || field.blobType == TDS_BLOB_DBID_CLASSDEF {
+		if err := ch.WriteUint16(uint16(len(field.classID))); err != nil {
+			return n, fmt.Errorf("failed to write ClassID length: %w", err)
+		}
+		n += 2
+
+		if len(field.classID) > 0 {
+			if err := ch.WriteString(field.classID); err != nil {
+				return n, fmt.Errorf("failed to write ClassID: %w", err)
+			}
+			n += len(field.classID)
+		}
+	}
+
+	return n, nil
+}
+
+type BlobFieldFmt struct{ fieldFmtBlob }
+
 type fieldDataBlob struct {
 	fieldData
 	serializationType BlobSerializationType
@@ -748,6 +845,7 @@ type fieldDataBlob struct {
 
 const fieldDataBlobHighBit uint32 = 0x80000000
 
+// ReadFrom implements the tds.FieldData interface.
 func (field *fieldDataBlob) ReadFrom(ch BytesChannel) (int, error) {
 	fieldFmt, ok := field.fmt.(*BlobFieldFmt)
 	if !ok {
@@ -865,7 +963,8 @@ func (field *fieldDataBlob) ReadFrom(ch BytesChannel) (int, error) {
 	return n, nil
 }
 
-func (field fieldDataBlob) Writeto(ch BytesChannel) (int, error) {
+// WriteTo implements the tds.FieldData interface.
+func (field fieldDataBlob) WriteTo(ch BytesChannel) (int, error) {
 	fieldFmt, ok := field.fmt.(*BlobFieldFmt)
 	if !ok {
 		return 0, fmt.Errorf("field.fmt is not of type BlobFieldFmt")
@@ -953,16 +1052,20 @@ func (field fieldDataBlob) Writeto(ch BytesChannel) (int, error) {
 
 type BlobFieldData struct{ fieldDataBlob }
 
+// Implementations: fieldFmtTxtPtr, fieldDataTxtPtr
+
 type fieldFmtTxtPtr struct {
 	fieldFmtBase
 
 	tableName string
 }
 
+// FormatByteLength implements the tds.FieldFmt interface.
 func (field fieldFmtTxtPtr) FormatByteLength() int {
 	return 2 + len(field.tableName) + field.LengthBytes()
 }
 
+// ReadFrom implements the tds.FieldFmt interface.
 func (field *fieldFmtTxtPtr) ReadFrom(ch BytesChannel) (int, error) {
 	n, err := field.readFromBase(ch)
 	if err != nil {
@@ -984,6 +1087,7 @@ func (field *fieldFmtTxtPtr) ReadFrom(ch BytesChannel) (int, error) {
 	return n, nil
 }
 
+// WriteTo implements the tds.FieldFmt interface.
 func (field fieldFmtTxtPtr) WriteTo(ch BytesChannel) (int, error) {
 	n, err := field.writeToBase(ch)
 	if err != nil {
@@ -1015,6 +1119,7 @@ type fieldDataTxtPtr struct {
 	timeStamp []byte
 }
 
+// ReadFrom implements the tds.FieldData interface.
 func (field *fieldDataTxtPtr) ReadFrom(ch BytesChannel) (int, error) {
 	n, err := field.readFromStatus(ch)
 	if err != nil {
@@ -1054,6 +1159,7 @@ func (field *fieldDataTxtPtr) ReadFrom(ch BytesChannel) (int, error) {
 	return n, nil
 }
 
+// WriteTo implements the tds.FieldData interface.
 func (field fieldDataTxtPtr) WriteTo(ch BytesChannel) (int, error) {
 	n, err := field.writeToStatus(ch)
 	if err != nil {
@@ -1103,7 +1209,7 @@ type TextFieldData struct{ fieldDataTxtPtr }
 type UniTextFieldData struct{ fieldDataTxtPtr }
 type XMLFieldData struct{ fieldDataTxtPtr }
 
-// utils
+// Utility-functions
 
 func readLengthBytes(ch BytesChannel, n int) (int, error) {
 	var length int

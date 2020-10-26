@@ -15,6 +15,8 @@ import (
 	"github.com/SAP/go-dblib/asetime"
 )
 
+// GoValue returns a value-interface based on a given byte slice and
+// depending on the ASE data type.
 func (t DataType) GoValue(endian binary.ByteOrder, bs []byte) (interface{}, error) {
 	if t.ByteSize() != -1 && len(bs) != t.ByteSize() {
 		return nil, fmt.Errorf("byte slice has invalid length of %d, expected %d bytes", len(bs), t.ByteSize())

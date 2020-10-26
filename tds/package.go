@@ -14,6 +14,7 @@ import (
 // BytesChannel does not have enough bytes to parse the package fully.
 var ErrNotEnoughBytes = errors.New("not enough bytes in channel to parse package")
 
+// Package is the interface providing the ReadFrom and WriteTo methods.
 type Package interface {
 	// ReadFrom reads bytes from the passed channel until either the
 	// channel is closed or the package has all required information.
@@ -28,6 +29,7 @@ type Package interface {
 	fmt.Stringer
 }
 
+// LookupPackage returns the package-struct linked to the passed token.
 func LookupPackage(token Token) (Package, error) {
 	switch token {
 	case TDS_EED:
@@ -79,6 +81,8 @@ func LookupPackage(token Token) (Package, error) {
 	}
 }
 
+// IsError returns true if the passed package is an EED- or
+// ErrorPackage.
 func IsError(pkg Package) bool {
 	switch pkg.(type) {
 	case *EEDPackage, *ErrorPackage:
@@ -88,6 +92,7 @@ func IsError(pkg Package) bool {
 	return false
 }
 
+// IsDone returns true if the passed package is a DonePackage.
 func IsDone(pkg Package) bool {
 	switch pkg.(type) {
 	case *DonePackage:

@@ -6,14 +6,17 @@ package tds
 
 import "fmt"
 
+// Interface statisfaction check.
 var _ Package = (*OrderByPackage)(nil)
 
+// OrderByPackage contains a reference to the previous RowFmt.
 type OrderByPackage struct {
 	// Reference the previous RowFmt
 	rowFmt      *RowFmtPackage
 	ColumnOrder []int
 }
 
+// LastPkg implements the tds.LastPkgAcceptor interface.
 func (pkg *OrderByPackage) LastPkg(other Package) error {
 	if rowFmt, ok := other.(*RowFmtPackage); ok {
 		pkg.rowFmt = rowFmt
@@ -22,6 +25,7 @@ func (pkg *OrderByPackage) LastPkg(other Package) error {
 	return fmt.Errorf("received package other than RowFmtPackage: %T", other)
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *OrderByPackage) ReadFrom(ch BytesChannel) error {
 	columnCount, err := ch.Uint16()
 	if err != nil {
@@ -41,6 +45,7 @@ func (pkg *OrderByPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg OrderByPackage) WriteTo(ch BytesChannel) error {
 	return fmt.Errorf("not implemented")
 }
@@ -49,6 +54,7 @@ func (pkg OrderByPackage) String() string {
 	return fmt.Sprintf("%T(%d): %v", pkg, len(pkg.ColumnOrder), pkg.ColumnOrder)
 }
 
+// Interface statisfaction check.
 var _ Package = (*OrderBy2Package)(nil)
 
 // OrderBy2Package is a superset of OrderByPackage and supports more
@@ -57,6 +63,7 @@ type OrderBy2Package struct {
 	OrderByPackage
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *OrderBy2Package) ReadFrom(ch BytesChannel) error {
 	totalBytes, err := ch.Uint32()
 	if err != nil {
@@ -88,6 +95,7 @@ func (pkg *OrderBy2Package) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo is not implemented.
 func (pkg OrderBy2Package) WriteTo(ch BytesChannel) error {
 	return fmt.Errorf("not implemented")
 }

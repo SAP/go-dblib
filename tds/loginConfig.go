@@ -13,10 +13,13 @@ import (
 	"github.com/SAP/go-dblib/dsn"
 )
 
+// LoginConfigRemoteServer contains the name and the password to the
+// server.
 type LoginConfigRemoteServer struct {
 	Name, Password string
 }
 
+// LoginConfig contains configuration to login to the server.
 type LoginConfig struct {
 	DSN      *dsn.Info
 	Hostname string
@@ -36,6 +39,9 @@ type LoginConfig struct {
 	Encrypt TDSMsgId
 }
 
+// NewLoginConfig creates a new login-configuration by using dsn
+// information and setting default configuration-values in regard to the
+// ASE database server (Should be be adjusted by clients).
 func NewLoginConfig(dsn *dsn.Info) (*LoginConfig, error) {
 	conf := &LoginConfig{}
 
@@ -72,7 +78,7 @@ func NewLoginConfig(dsn *dsn.Info) (*LoginConfig, error) {
 	return conf, nil
 }
 
-// TODO lower-casing
+// TDS default login-configuration values.
 const (
 	TDS_MAXNAME   = 30
 	TDS_NETBUF    = 4

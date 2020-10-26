@@ -24,10 +24,12 @@ var (
 	}
 )
 
+// Version contains library-versions.
 type Version struct {
 	major, minor, sp, patch uint8
 }
 
+// NewVersion creates a Version-struct.
 func NewVersion(bs []byte) (*Version, error) {
 	if len(bs) != 4 {
 		return nil, fmt.Errorf("expected 4 byte array, received %d byte array: %v", len(bs), bs)
@@ -42,6 +44,7 @@ func NewVersion(bs []byte) (*Version, error) {
 	return v, nil
 }
 
+// NewVersionString parses the passed string into a version-struct.
 func NewVersionString(s string) (*Version, error) {
 	split := strings.Split(s, ".")
 	if len(split) != 4 {
@@ -93,6 +96,9 @@ func NewVersionString(s string) (*Version, error) {
 	return v, nil
 }
 
+// Compare returns 0 if tdsv and other are equal.
+//	 1 is returned if a tdsv.property is greater than a other.property.
+//	-1 is returned if a tdsv.property is smaller than a other.property.
 func (tdsv Version) Compare(other Version) int {
 	if tdsv.major > other.major {
 		return 1

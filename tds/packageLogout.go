@@ -6,12 +6,15 @@ package tds
 
 import "fmt"
 
+// Interface statisfaction check.
 var _ Package = (*LogoutPackage)(nil)
 
+// LogoutPackage contains logout-options.
 type LogoutPackage struct {
 	Options uint8
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *LogoutPackage) ReadFrom(ch BytesChannel) error {
 	var err error
 	pkg.Options, err = ch.Uint8()
@@ -26,6 +29,7 @@ func (pkg *LogoutPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg LogoutPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_LOGOUT)); err != nil {
 		return err

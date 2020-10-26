@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+// ParseAndExecQueries parses the passed line into queries that are
+// later executed.
 func ParseAndExecQueries(db *sql.DB, line string) error {
 	builder := strings.Builder{}
 	currentlyQuoted := false

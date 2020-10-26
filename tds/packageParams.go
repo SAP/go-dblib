@@ -8,25 +8,31 @@ import (
 	"fmt"
 )
 
+// Interface satisfaction checks.
 var _ Package = (*ParamsPackage)(nil)
 var _ Package = (*RowPackage)(nil)
 
+// ParamsPackage contains a ParamFmt- and RowFmt-Package as well as
+// field-data.
 type ParamsPackage struct {
 	paramFmt   *ParamFmtPackage
 	rowFmt     *RowFmtPackage
 	DataFields []FieldData
 }
 
+// RowPackage contains a param-package.
 type RowPackage struct {
 	ParamsPackage
 }
 
+// NewParamsPackage creates a param-package with field-data.
 func NewParamsPackage(data ...FieldData) *ParamsPackage {
 	return &ParamsPackage{
 		DataFields: data,
 	}
 }
 
+// LastPkg implements the tds.LastPkgAcceptor interface.
 func (pkg *ParamsPackage) LastPkg(other Package) error {
 	switch otherPkg := other.(type) {
 	case *ParamFmtPackage:
@@ -46,7 +52,7 @@ func (pkg *ParamsPackage) LastPkg(other Package) error {
 	}
 
 	if pkg.DataFields != nil {
-		// pkg.Datafiels has already been filled - this package was
+		// pkg.Datafields has already been filled - this package was
 		// created by the client and is being added to the message.
 		return nil
 	}
@@ -74,6 +80,7 @@ func (pkg *ParamsPackage) LastPkg(other Package) error {
 	return nil
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *ParamsPackage) ReadFrom(ch BytesChannel) error {
 	for i, field := range pkg.DataFields {
 		// TODO can the written byte count be validated?
@@ -86,6 +93,7 @@ func (pkg *ParamsPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg ParamsPackage) WriteTo(ch BytesChannel) error {
 	var token Token
 	if pkg.paramFmt != nil {

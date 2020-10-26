@@ -23,7 +23,10 @@ var (
 	fMaxColPrintLength = flag.Int("maxColLength", 50, "Maximum number of characters to print for column")
 )
 
+// GenericExecer is the interface providing the GenericExec method.
 type GenericExecer interface {
+	// GenericExec is the central method through which SQL statements
+	// are sent to ASE.
 	GenericExec(context.Context, string, []driver.NamedValue) (driver.Rows, driver.Result, error)
 }
 

@@ -57,6 +57,7 @@ func generateSymmetricKey(odce odceCipher) ([]byte, error) {
 }
 
 //go:generate stringer -type=odceCipher
+
 // OnDemand Command Encryption cipher
 type odceCipher int
 

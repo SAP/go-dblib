@@ -17,17 +17,17 @@ func NewDefaultVersion(spec string) Version {
 	return &DefaultVersion{spec, map[*Capability]bool{}}
 }
 
-// VersionString returns the version spec.
+// VersionString implements the capability.Version interface.
 func (v DefaultVersion) VersionString() string {
 	return v.spec
 }
 
-// SetCapability sets the capability as enabled or disabled.
+// SetCapability implements the capability.Version interface.
 func (v *DefaultVersion) SetCapability(cap *Capability, b bool) {
 	v.capabilities[cap] = b
 }
 
-// Has returns if the capability is enabled or disabled.
+// Has implements the capability.Version interface.
 func (v DefaultVersion) Has(cap *Capability) bool {
 	canCap, ok := v.capabilities[cap]
 	if !ok {

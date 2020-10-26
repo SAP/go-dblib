@@ -10,8 +10,11 @@ import (
 	"github.com/SAP/go-dblib/asetypes"
 )
 
+// Interface satisfaction check.
 var _ Package = (*RowFmtPackage)(nil)
 
+// RowFmtPackage contains field-format and differentiates between
+// TDS_ROWFMT and TDS_ROWFMT2.
 type RowFmtPackage struct {
 	Fmts []FieldFmt
 	// Wide differentiates TDS_ROWFMT from TDS_ROWFMT2 and considers the
@@ -20,6 +23,7 @@ type RowFmtPackage struct {
 	wide bool
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *RowFmtPackage) ReadFrom(ch BytesChannel) error {
 	totalLength, err := ch.Uint32()
 	if err != nil {
@@ -50,6 +54,10 @@ func (pkg *RowFmtPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// ReadFromField reads bytes from the passed channel until either the
+// channel is closed or the package has all required information.
+// The information are stored into a field-format and returned with the
+// amount of read bytes.
 func (pkg *RowFmtPackage) ReadFromField(ch BytesChannel) (FieldFmt, int, error) {
 	n := 0
 
@@ -182,6 +190,7 @@ func (pkg *RowFmtPackage) ReadFromField(ch BytesChannel) (FieldFmt, int, error) 
 	return fieldFmt, n, nil
 }
 
+// WriteTo is not implemented.
 func (pkg *RowFmtPackage) WriteTo(ch BytesChannel) error {
 	return fmt.Errorf("not implemented")
 }

@@ -11,13 +11,18 @@ import (
 	"io"
 )
 
+// Default size of a packet-header.
 const (
 	PacketHeaderSize = 8
 )
 
 //go:generate stringer -type=PacketHeaderType
+
+// PacketHeaderType is the type for bitmask values of a packet-header
+// type.
 type PacketHeaderType uint8
 
+// Types of packet-header.
 const (
 	TDS_BUF_LANG PacketHeaderType = iota + 1
 	TDS_BUF_LOGIN
@@ -45,8 +50,12 @@ const (
 )
 
 //go:generate stringer -type=PacketHeaderStatus
+
+// PacketHeaderStatus is the type for bitmask values of a packet-header
+// status.
 type PacketHeaderStatus uint8
 
+// States of packet-header.
 const (
 	// Last buffer in a request or response
 	TDS_BUFSTAT_EOM PacketHeaderStatus = 0x1
@@ -65,6 +74,7 @@ const (
 	TDS_BUFSTAT_SYMENCRYPT PacketHeaderStatus = 0x40
 )
 
+//PacketHeader contains information about the packet-header.
 type PacketHeader struct {
 	// Message type, e.g. for login or language command
 	MsgType PacketHeaderType
@@ -80,6 +90,7 @@ type PacketHeader struct {
 	Window uint8
 }
 
+// NewPacketHeader creates a packet-header struct.
 func NewPacketHeader(packetSize int) PacketHeader {
 	return PacketHeader{
 		Length: uint16(packetSize),
@@ -93,6 +104,7 @@ func (header PacketHeader) String() string {
 	)
 }
 
+// WriteTo writes a byte-slice and returns the amount of bytes written.
 func (header PacketHeader) WriteTo(w io.Writer) (int64, error) {
 	bs := make([]byte, PacketHeaderSize)
 	n, err := header.Read(bs)
@@ -104,6 +116,7 @@ func (header PacketHeader) WriteTo(w io.Writer) (int64, error) {
 	return int64(m), err
 }
 
+// Read satisfies the io.Reader interface.
 func (header PacketHeader) Read(bs []byte) (int64, error) {
 	if len(bs) != PacketHeaderSize {
 		return 0, fmt.Errorf("target buffer has unexpected length, expected %d bytes, buffer length is %d",
@@ -120,6 +133,8 @@ func (header PacketHeader) Read(bs []byte) (int64, error) {
 	return PacketHeaderSize, nil
 }
 
+// ReadFrom reads a byte-slice, writes it to the header and returns the
+// amount of written bytes.
 func (header *PacketHeader) ReadFrom(r io.Reader) (int64, error) {
 	bs := make([]byte, PacketHeaderSize)
 	n, err := r.Read(bs)
@@ -134,6 +149,7 @@ func (header *PacketHeader) ReadFrom(r io.Reader) (int64, error) {
 	return int64(m), err
 }
 
+// Write satisfies the io.Writer interface.
 func (header *PacketHeader) Write(bs []byte) (int64, error) {
 	if len(bs) != PacketHeaderSize {
 		return 0, fmt.Errorf("passed buffer has unexpected length, expected 8 bytes, buffer length is %d", len(bs))

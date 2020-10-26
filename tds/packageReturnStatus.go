@@ -6,12 +6,15 @@ package tds
 
 import "fmt"
 
+// Interface satisfaction check.
 var _ Package = (*ReturnStatusPackage)(nil)
 
+// ReturnStatusPackage contains a return-value.
 type ReturnStatusPackage struct {
 	ReturnValue int32
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *ReturnStatusPackage) ReadFrom(ch BytesChannel) error {
 	var err error
 
@@ -22,6 +25,7 @@ func (pkg *ReturnStatusPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg ReturnStatusPackage) WriteTo(ch BytesChannel) error {
 	return ch.WriteInt32(pkg.ReturnValue)
 }

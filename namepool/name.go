@@ -13,6 +13,7 @@ type Name struct {
 	pool *pool
 }
 
+// Name returns the name of name.
 func (name Name) Name() string {
 	return name.name
 }
@@ -21,6 +22,7 @@ func (name Name) String() string {
 	return name.Name()
 }
 
+// ID returns the id of name.
 func (name Name) ID() uint64 {
 	return *name.id
 }

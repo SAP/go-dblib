@@ -12,7 +12,7 @@ import (
 	"github.com/SAP/go-dblib/dsn"
 )
 
-// SetupDB creates a database and sets .Database on the passed testDsn
+// SetupDB creates a database and sets .Database on the passed testDsn.
 func SetupDB(testDsn *dsn.Info) error {
 	db, err := sql.Open("ase", testDsn.AsSimple())
 	if err != nil {

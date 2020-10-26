@@ -6,6 +6,7 @@ package tds
 
 import "fmt"
 
+// ErrorPackage contains information about the error.
 type ErrorPackage struct {
 	ErrorNumber int32
 	State       uint8
@@ -16,6 +17,7 @@ type ErrorPackage struct {
 	LineNr      uint16
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *ErrorPackage) ReadFrom(ch BytesChannel) error {
 	expectLength, err := ch.Uint16()
 	if err != nil {
@@ -78,6 +80,7 @@ func (pkg *ErrorPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg ErrorPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_ERROR)); err != nil {
 		return fmt.Errorf("failed to write TDS Token %s: %w", TDS_ERROR, err)
