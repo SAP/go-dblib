@@ -104,7 +104,7 @@ func (header PacketHeader) String() string {
 	)
 }
 
-// WriteTo writes a byte-slice and returns the amount of bytes written.
+// WriteTo writes a byte slice and returns the amount of bytes written.
 func (header PacketHeader) WriteTo(w io.Writer) (int64, error) {
 	bs := make([]byte, PacketHeaderSize)
 	n, err := header.Read(bs)
@@ -133,7 +133,7 @@ func (header PacketHeader) Read(bs []byte) (int64, error) {
 	return PacketHeaderSize, nil
 }
 
-// ReadFrom reads a byte-slice, writes it to the header and returns the
+// ReadFrom reads a byte slice, writes it to the header and returns the
 // amount of written bytes.
 func (header *PacketHeader) ReadFrom(r io.Reader) (int64, error) {
 	bs := make([]byte, PacketHeaderSize)

@@ -25,18 +25,25 @@ Server.
 
 `go-dblib` contains the following packages:
 
-- `asetime`: Contains code for ...
-- `capability`: Contains code for ...
-- `flagslice`: Contains code for ...
+- `asetime` contains code to handle date and time values between golang
+  and ASE data types.
+- `asetypes` contains code to handle golang and their respective ASE
+  data types.
+- `capability` contains code to provide abstract structures to keep
+  a history of capabilities and features.
+- `dsn` contains code to get and parse dsn information to connect to
+  a database.
+- `flagslice` defines slice types to be used as custom flag types for
+  the flag library.
 - `integration` contains a test-setup to conduct integration-tests in
   the respective driver-implementations for
 [`go-ase/integration_test.go`][purego] and
 [`cgo-ase/integration_test.go`][cgo].
-- `dsn`: Contains code for ...
-- `namepool`: Contains code for ...
-- `tds`: Contains code for ...
-- `term`: Contains code for ...
-- `asetypes`: Contains code for ...
+- `namepool` provides a name pool that contains names that are safe to
+  use by multiple goroutines.
+- `term` contains common code for interactive database clients.
+- `tds` contains code to communicate with a database through the
+  tds-protocol (in this case the ASE database).
 
 ## Requirements
 

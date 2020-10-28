@@ -30,7 +30,7 @@ func NewPacket(packetSize int) *Packet {
 	return packet
 }
 
-// Bytes returns a byte-slice of a packet.
+// Bytes returns a byte slice of a packet.
 func (packet Packet) Bytes() ([]byte, error) {
 	bs := make([]byte, int(packet.Header.Length))
 
@@ -110,7 +110,7 @@ func (packet *Packet) ReadFrom(ctx context.Context, reader io.Reader, timeout ti
 	return totalBytes, nil
 }
 
-// WriteTo writes a byte-slice and returns the amount of written bytes.
+// WriteTo writes a byte slice and returns the amount of written bytes.
 func (packet Packet) WriteTo(writer io.Writer) (int64, error) {
 	bs, err := packet.Bytes()
 	if err != nil {
