@@ -174,14 +174,15 @@ func (tds *Conn) Close() error {
 	return me
 }
 
-// PacketSize returns the negotiated packet size.
-func (tds Conn) PacketSize() int {
+func (tds *Conn) PacketSize() int {
+	// Must be pointer-receive as it is passed to Channels to acquire
+	// the negotiated packet size.
 	return tds.packetSize
 }
 
-// PacketBodySize returns the negotiated packet size minus the packet
-// header size.
-func (tds Conn) PacketBodySize() int {
+func (tds *Conn) PacketBodySize() int {
+	// Must be pointer-receive as it is passed to Channels to acquire
+	// the negotiated packet size.
 	return tds.packetSize - PacketHeaderSize
 }
 
