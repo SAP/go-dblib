@@ -54,6 +54,13 @@ type DynamicPackage struct {
 	wide bool
 }
 
+// NewDynamicPackage returns a dynamic package marked as wide.
+func NewDynamicPackage(wide bool) *DynamicPackage {
+	dyn := new(DynamicPackage)
+	dyn.wide = wide
+	return dyn
+}
+
 // ReadFrom implements the tds.Package interface.
 func (pkg *DynamicPackage) ReadFrom(ch BytesChannel) error {
 	var totalLength int
