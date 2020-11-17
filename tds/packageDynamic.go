@@ -7,6 +7,7 @@ package tds
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 //go:generate stringer -type=DynamicOperationType
@@ -51,6 +52,13 @@ type DynamicPackage struct {
 	Stmt   string
 
 	wide bool
+}
+
+// NewDynamicPackage returns a dynamic package marked as wide.
+func NewDynamicPackage(wide bool) *DynamicPackage {
+	dyn := new(DynamicPackage)
+	dyn.wide = wide
+	return dyn
 }
 
 // ReadFrom implements the tds.Package interface.
@@ -142,24 +150,47 @@ func (pkg *DynamicPackage) WriteTo(ch BytesChannel) error {
 		return err
 	}
 
+	// maxLength is the maximum length of bytes for the package
+	maxLength := math.MaxInt16
+	if pkg.wide {
+		maxLength = math.MaxInt32
+	}
+	// userMaxLength is the maximum length of bytes for values the user
+	// can supply
+	userMaxLength := maxLength
+
 	// 1  dynamicType
 	// 1  dynamicStatus
 	// 1  id length
 	// x  id
 	totalLength := 3 + len(pkg.ID)
+	userMaxLength -= 3
 	if pkg.Type&TDS_DYN_PREPARE == TDS_DYN_PREPARE || pkg.Type&TDS_DYN_EXEC_IMMED == TDS_DYN_EXEC_IMMED {
 		// 2  stmt length if !pkg.wide
 		// 4 stmt length if pkg.wide
 		// x  stmt
 		totalLength += 2 + len(pkg.Stmt)
+		userMaxLength -= 2
 		if pkg.wide {
 			// add two more bytes for TDS_DYNAMIC2
 			totalLength += 2
+			userMaxLength -= 2
 		}
 	}
 
-	if err := ch.WriteUint16(uint16(totalLength)); err != nil {
-		return err
+	if totalLength >= maxLength {
+		return fmt.Errorf("tds: query too long, statement ID and query can at most be %d bytes long",
+			userMaxLength)
+	}
+
+	if pkg.wide {
+		if err := ch.WriteUint32(uint32(totalLength)); err != nil {
+			return err
+		}
+	} else {
+		if err := ch.WriteUint16(uint16(totalLength)); err != nil {
+			return err
+		}
 	}
 
 	if err := ch.WriteByte(byte(pkg.Type)); err != nil {

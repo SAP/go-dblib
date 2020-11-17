@@ -46,7 +46,11 @@ type Conn struct {
 	packetSize int
 }
 
-// NewConn creates a Conn and opens channels.
+// Dial returns a prepared and dialed Conn.
+//
+// A new child context will be created from the passed context and used
+// to abort any interaction with the server - hence closing the parent
+// context will abort all interaction with the server.
 func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
 	network := "tcp"
 	if prop := dsn.Prop("network"); prop != "" {
@@ -175,13 +179,17 @@ func (tds *Conn) Close() error {
 }
 
 // PacketSize returns the negotiated packet size.
-func (tds Conn) PacketSize() int {
+func (tds *Conn) PacketSize() int {
+	// Must be pointer-receive as it is passed to Channels to acquire
+	// the negotiated packet size.
 	return tds.packetSize
 }
 
 // PacketBodySize returns the negotiated packet size minus the packet
 // header size.
-func (tds Conn) PacketBodySize() int {
+func (tds *Conn) PacketBodySize() int {
+	// Must be pointer-receive as it is passed to Channels to acquire
+	// the negotiated packet size.
 	return tds.packetSize - PacketHeaderSize
 }
 
