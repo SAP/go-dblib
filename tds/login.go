@@ -93,7 +93,7 @@ func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 	}
 
 	if loginack.Status != TDS_LOG_NEGOTIATE {
-		return fmt.Errorf("expected loginack with negotation, received: %s", loginack)
+		return fmt.Errorf("expected loginack with negotiation, received: %s", loginack)
 	}
 
 	pkg, err = tdsChan.NextPackage(ctx, true)

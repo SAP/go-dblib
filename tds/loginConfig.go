@@ -34,7 +34,7 @@ type LoginConfig struct {
 
 	RemoteServers []LoginConfigRemoteServer
 
-	// Encrypt allows any TDSMsgId but only negotation-relevant security
+	// Encrypt allows any TDSMsgId but only negotiation-relevant security
 	// bits such as TDS_MSG_SEC_ENCRYPT will be recognized.
 	Encrypt TDSMsgId
 }

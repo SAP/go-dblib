@@ -12,7 +12,7 @@ import "fmt"
 // variable change types.
 type EnvChangeType uint8
 
-// Types of a changeable enviroment variable.
+// Types of a changeable environment variable.
 const (
 	TDS_ENV_DB       EnvChangeType = 0x1
 	TDS_ENV_LANG     EnvChangeType = 0x2

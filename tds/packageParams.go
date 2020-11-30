@@ -105,7 +105,7 @@ func (pkg ParamsPackage) WriteTo(ch BytesChannel) error {
 	}
 
 	if err := ch.WriteByte(byte(token)); err != nil {
-		return fmt.Errorf("error ocurred writing TDS token %s: %w", token, err)
+		return fmt.Errorf("error occurred writing TDS token %s: %w", token, err)
 	}
 
 	for i, field := range pkg.DataFields {
