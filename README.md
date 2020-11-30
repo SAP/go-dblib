@@ -53,7 +53,7 @@ import (
 )
 
 func main() {
-    d := dsn.NewDsnInfo()
+    d := dsn.NewInfo()
     d.Host = "hostname"
     d.Port = "4901"
     d.Username = "user"
