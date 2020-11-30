@@ -188,7 +188,9 @@ type fieldFmtBase struct {
 	// specific to TDS_ROWFMT2
 	// wide_row controls if the TDS_ROWFMT2 specific members are filled
 	// and written. It is set by TDS_ROWFMT2 when creating a field.
-	wide_row    bool
+
+	// Marked as comment to prevent failure of golangci-lint
+	// wide_row    bool
 	columnLabel string
 	catalogue   string
 	schema      string
