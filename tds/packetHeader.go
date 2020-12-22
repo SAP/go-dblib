@@ -74,7 +74,7 @@ const (
 	TDS_BUFSTAT_SYMENCRYPT PacketHeaderStatus = 0x40
 )
 
-//PacketHeader contains information about the packet-header.
+// PacketHeader contains information about the packet-header.
 type PacketHeader struct {
 	// Message type, e.g. for login or language command
 	MsgType PacketHeaderType
