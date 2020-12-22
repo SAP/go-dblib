@@ -266,6 +266,18 @@ func (tdsChan *Channel) handleSpecialPackage(pkg Package) (bool, error) {
 	return true, nil
 }
 
+func (tdsChan *Channel) SetLastPkgRx(pkg Package) {
+	tdsChan.RLock()
+	defer tdsChan.RUnlock()
+	tdsChan.lastPkgRx = pkg
+}
+
+func (tdsChan *Channel) SetLastPkgTx(pkg Package) {
+	tdsChan.RLock()
+	defer tdsChan.RUnlock()
+	tdsChan.lastPkgTx = pkg
+}
+
 // NextPackage returns the next package in the queue.
 // An error may be returned in the following cases:
 //	1. The connections' context was closed.
