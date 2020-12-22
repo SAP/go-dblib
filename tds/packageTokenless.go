@@ -9,12 +9,12 @@ import (
 	"fmt"
 )
 
-// TokenlessPackage contains data.
+// TokenlessPackage are used to transmit blobs of data.
 type TokenlessPackage struct {
 	Data *bytes.Buffer
 }
 
-// NewTokenLessPackage creates a tokenless-package.
+// NewTokenLessPackage returns an initialized TokenlessPackage.
 func NewTokenlessPackage() *TokenlessPackage {
 	return &TokenlessPackage{
 		Data: &bytes.Buffer{},

@@ -8,24 +8,22 @@ import (
 	"fmt"
 )
 
-// Interface satisfaction checks.
 var _ Package = (*ParamsPackage)(nil)
 var _ Package = (*RowPackage)(nil)
 
-// ParamsPackage contains a ParamFmt- and RowFmt-Package as well as
-// field-data.
+// ParamsPackage is used to communicate a parameters or arguments.
 type ParamsPackage struct {
 	paramFmt   *ParamFmtPackage
 	rowFmt     *RowFmtPackage
 	DataFields []FieldData
 }
 
-// RowPackage contains a param-package.
+// RowPackage is used to communicate a row.
 type RowPackage struct {
 	ParamsPackage
 }
 
-// NewParamsPackage creates a param-package with field-data.
+// NewParamsPackage returns an initialized ParamsPkg.
 func NewParamsPackage(data ...FieldData) *ParamsPackage {
 	return &ParamsPackage{
 		DataFields: data,

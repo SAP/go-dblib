@@ -6,7 +6,7 @@ package tds
 
 import "fmt"
 
-// ErrorPackage contains information about the error.
+// ErrorPackage is a deprecated package used to communicate errors.
 type ErrorPackage struct {
 	ErrorNumber int32
 	State       uint8

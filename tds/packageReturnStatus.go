@@ -6,10 +6,10 @@ package tds
 
 import "fmt"
 
-// Interface satisfaction check.
 var _ Package = (*ReturnStatusPackage)(nil)
 
-// ReturnStatusPackage contains a return-value.
+// ReturnStatusPackage communicates the return status of stored
+// procedures.
 type ReturnStatusPackage struct {
 	ReturnValue int32
 }

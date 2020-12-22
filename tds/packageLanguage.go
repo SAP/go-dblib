@@ -8,18 +8,17 @@ import "fmt"
 
 //go:generate stringer -type=LanguageStatus
 
-// LanguageStatus is the type for valuemask values of a language status
-// valuemask.
+// LanguageStatus is a bitmask for options on a language package.
 type LanguageStatus int
 
-// States of language.
 const (
 	TDS_LANGUAGE_NOARGS   LanguageStatus = 0x0
 	TDS_LANGUAGE_HASARGS  LanguageStatus = 0x1
-	TDS_LANG_BATCH_PARAMS LanguageStatus = 0x04
+	TDS_LANG_BATCH_PARAMS LanguageStatus = 0x4
 )
 
-// LanguagePackage contains the status and command.
+// LanguagePackage is used to execute an SQL statement without
+// arguments.
 type LanguagePackage struct {
 	Status LanguageStatus
 	Cmd    string

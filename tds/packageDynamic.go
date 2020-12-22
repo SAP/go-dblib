@@ -12,8 +12,8 @@ import (
 
 //go:generate stringer -type=DynamicOperationType
 
-// DynamicOperationType is the type for valuemask values of
-// a dynamic-operation-package type.
+// DynamicOperationType is a bitmask to indicate the options of
+// a dynamic SQL statement.
 type DynamicOperationType byte
 
 // Types of a dynamic-operation-package.
@@ -31,20 +31,21 @@ const (
 
 //go:generate stringer -type=DynamicStatusType
 
-// DynamicStatusType is the type for valuemask values of
-// a dynamic-status-package type.
+// DynamicStatusType is a bitmask indicating the status of a dynamic SQL
+// statement.
 type DynamicStatusType byte
 
 // Types of a dynamic-status-package.
 const (
-	TDS_DYNAMIC_UNUSED            DynamicStatusType = 0x00
-	TDS_DYNAMIC_HASARGS           DynamicStatusType = 0x01
+	TDS_DYNAMIC_UNUSED            DynamicStatusType = 0x0
+	TDS_DYNAMIC_HASARGS           DynamicStatusType = 0x1
 	TDS_DYNAMIC_SUPPRESS_FMT      DynamicStatusType = 0x2
 	TDS_DYNAMIC_BATCH_PARAMS      DynamicStatusType = 0x4
-	TDS_DYNAMIC_SUPPRESS_PARAMFMT DynamicStatusType = 0x08
+	TDS_DYNAMIC_SUPPRESS_PARAMFMT DynamicStatusType = 0x8
 )
 
-// DynamicPackage contains information about the dynamic-package.
+// DynamicPackage is used to allocate and deallocate as well as request
+// information on a dynamic SQL statement.
 type DynamicPackage struct {
 	Type   DynamicOperationType
 	Status DynamicStatusType
@@ -54,7 +55,7 @@ type DynamicPackage struct {
 	wide bool
 }
 
-// NewDynamicPackage returns a dynamic package marked as wide.
+// NewDynamicPackage returns a dynamic package.
 func NewDynamicPackage(wide bool) *DynamicPackage {
 	dyn := new(DynamicPackage)
 	dyn.wide = wide

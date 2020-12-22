@@ -8,10 +8,9 @@ import "fmt"
 
 //go:generate stringer -type=TDSMsgStatus
 
-// TDSMsgStatus is the type for bitmask values of a TDS-message status.
+// TDSMsgStatus defines wether a message package has arguments or not.
 type TDSMsgStatus uint8
 
-// States of a TDS-message.
 const (
 	TDS_MSG_HASNOARGS TDSMsgStatus = iota
 	TDS_MSG_HASARGS
@@ -19,10 +18,9 @@ const (
 
 //go:generate stringer -type=TDSMsgId
 
-// TDSMsgId is the type for bitmask values of a TDS-message id.
+// TDSMsgId is the type of a message package.
 type TDSMsgId uint16
 
-// Ids of a TDS-message.
 const (
 	TDS_MSG_SEC_ENCRYPT TDSMsgId = iota + 1
 	TDS_MSG_SEC_LOGPWD
@@ -61,28 +59,25 @@ const (
 	TDS_MSG_SEC_ENCRYPT4
 )
 
-// TDSOpaqueSecurityToken is the type for bitmask values of
-// a TDS-message security-token.
+// TDSOpaqueSecurityToken is the type of a security token.
 type TDSOpaqueSecurityToken uint8
 
-// Security-tokens of a TDS-message.
 const (
-	/*
-	 ** TDS_MSG_SEC_OPAQUE message types.
-	 */
 	TDS_SEC_SECSESS TDSOpaqueSecurityToken = iota
 	TDS_SEC_FORWARD
 	TDS_SEC_SIGN
 	TDS_SEC_OTHER
 )
 
-// MsgPackage contains the status and id of a TDS-message.
+// MsgPackage is used to communicate miscellaneous information that does
+// not warrant its own package.
 type MsgPackage struct {
 	Status TDSMsgStatus
 	MsgId  TDSMsgId
 }
 
-// NewMsgPackage creates a TDS-message with status and id.
+// NewMsgPackage returns a TDS-message with status and id.
+// TODO remove?
 func NewMsgPackage(status TDSMsgStatus, msgId TDSMsgId) *MsgPackage {
 	return &MsgPackage{
 		Status: status,

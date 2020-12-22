@@ -10,11 +10,9 @@ import (
 	"github.com/SAP/go-dblib/asetypes"
 )
 
-// Interface satisfaction check.
 var _ Package = (*RowFmtPackage)(nil)
 
-// RowFmtPackage contains field-format and differentiates between
-// TDS_ROWFMT and TDS_ROWFMT2.
+// RowFmtPackage communicates the data types of rows.
 type RowFmtPackage struct {
 	Fmts []FieldFmt
 	// Wide differentiates TDS_ROWFMT from TDS_ROWFMT2 and considers the
@@ -56,8 +54,6 @@ func (pkg *RowFmtPackage) ReadFrom(ch BytesChannel) error {
 
 // ReadFromField reads bytes from the passed channel until either the
 // channel is closed or the package has all required information.
-// The information are stored into a field-format and returned with the
-// amount of read bytes.
 func (pkg *RowFmtPackage) ReadFromField(ch BytesChannel) (FieldFmt, int, error) {
 	n := 0
 

@@ -13,18 +13,6 @@
 // Note: The data types are embedded instead of aliased to provide the
 // methods of the embedded types - aliasing does not provide access to
 // the methods of the source type.
-//
-// File-Structure:
-// - Format and data status
-// - Interfaces
-// - Base structs and methods: fieldFmtBase, fieldDataBase
-// - Implementations (Derived structs and methods):
-//   - fieldFmtLength, fieldData
-//   - fieldFmtLengthScale, fieldData
-//   - fieldFmtLengthPrecisionScale, fieldDataPrecisionScale
-//   - fieldFmtBlob, fieldDataBlob
-//   - fieldFmtTxtPtr, fieldDataTxtPtr
-// - Utility-functions
 
 package tds
 
@@ -80,7 +68,7 @@ const (
 	TDS_ROW_PADCHAR      RowFmtStatus = 0x80
 )
 
-// DataStatus is the type for bitmask values of a data status.
+// DataStatus defines the valid states of data in fields.
 type DataStatus uint
 
 const (
@@ -92,11 +80,7 @@ const (
 
 // Interfaces
 
-// FieldFmt is the interface providing the ReadFrom- and WriteTo-method
-// to read from or write to a field by communicating format information
-// through the tds-protocol from or to a server.
-//
-// Additionally, several Setter- and Getter-methods are provided.
+// FieldFmt defines the interface for datatype formats.
 type FieldFmt interface {
 	// Format information as sent to or received from TDS server
 	DataType() asetypes.DataType
@@ -152,11 +136,7 @@ type FieldFmt interface {
 	FormatByteLength() int
 }
 
-// FieldData is the interface providing the ReadFrom- and WriteTo-method
-// to read from or write to a field by communicating data through the tds-
-// protocol from or to a server.
-//
-// Additionally, several Setter- and Getter-methods are provided.
+// FieldData defines the interface for datatype data.
 type FieldData interface {
 	// Format information send by TDS server
 	Status() DataStatus
@@ -736,24 +716,23 @@ type NumNFieldData struct{ fieldDataPrecisionScale }
 
 //go:generate stringer -type=BlobType
 
-// BlobType is the type for bitmask values of a blob types.
+// BlobType defines the type of a data blob.
 type BlobType uint8
 
 const (
-	TDS_BLOB_FULLCLASSNAME BlobType = 0x01
-	TDS_BLOB_DBID_CLASSDEF BlobType = 0x02
-	TDS_BLOB_CHAR          BlobType = 0x03
-	TDS_BLOB_BINARY        BlobType = 0x04
-	TDS_BLOB_UNICHAR       BlobType = 0x05
-	TDS_LOBLOC_CHAR        BlobType = 0x06
-	TDS_LOBLOC_BINARY      BlobType = 0x07
-	TDS_LOBLOC_UNICHAR     BlobType = 0x08
+	TDS_BLOB_FULLCLASSNAME BlobType = iota + 1
+	TDS_BLOB_DBID_CLASSDEF
+	TDS_BLOB_CHAR
+	TDS_BLOB_BINARY
+	TDS_BLOB_UNICHAR
+	TDS_LOBLOC_CHAR
+	TDS_LOBLOC_BINARY
+	TDS_LOBLOC_UNICHAR
 )
 
 //go:generate stringer -type=BlobSerializationType
 
-// BlobSerializationType is the type for bitmask values of a blob
-// serialization-types.
+// BlobSerializationType defines the seralization type of a data blob.
 type BlobSerializationType uint8
 
 const (
@@ -1355,7 +1334,7 @@ func LookupFieldFmt(dataType asetypes.DataType) (FieldFmt, error) {
 	return f, nil
 }
 
-/// LookupFieldData returns the FieldData for a given field format.
+// LookupFieldData returns the FieldData for a given field format.
 func LookupFieldData(fieldFmt FieldFmt) (FieldData, error) {
 	var d FieldData
 
@@ -1452,8 +1431,8 @@ func LookupFieldData(fieldFmt FieldFmt) (FieldData, error) {
 	return d, nil
 }
 
-// LookupFieldFmtData returns both Fieldfmt and FieldData for a given
-// data type.
+// LookupFieldFmtData returns both a FieldFmt and a FieldData for
+// a given data type.
 func LookupFieldFmtData(dataType asetypes.DataType) (FieldFmt, FieldData, error) {
 	fieldFmt, err := LookupFieldFmt(dataType)
 	if err != nil {

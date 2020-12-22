@@ -6,10 +6,14 @@ package tds
 
 import "fmt"
 
-// Interface statisfaction check.
 var _ Package = (*OrderByPackage)(nil)
 
-// OrderByPackage contains a reference to the previous RowFmt.
+// OrderByPackage communicates in which order columns should be used.
+//
+// When a statement is executed the returned columns are in whatever
+// order is most convenient for the server. The server may then send an
+// OrderByPackage to communicate in which order the columns should be
+// listed.
 type OrderByPackage struct {
 	// Reference the previous RowFmt
 	rowFmt      *RowFmtPackage
@@ -54,7 +58,6 @@ func (pkg OrderByPackage) String() string {
 	return fmt.Sprintf("%T(%d): %v", pkg, len(pkg.ColumnOrder), pkg.ColumnOrder)
 }
 
-// Interface statisfaction check.
 var _ Package = (*OrderBy2Package)(nil)
 
 // OrderBy2Package is a superset of OrderByPackage and supports more

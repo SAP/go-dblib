@@ -78,7 +78,8 @@ func NewLoginConfig(dsn *dsn.Info) (*LoginConfig, error) {
 	return conf, nil
 }
 
-// TDS default login-configuration values.
+// These constants define the maximum length for various options in
+// a login payload.
 const (
 	TDS_MAXNAME   = 30
 	TDS_NETBUF    = 4

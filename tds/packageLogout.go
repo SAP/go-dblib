@@ -6,10 +6,9 @@ package tds
 
 import "fmt"
 
-// Interface statisfaction check.
 var _ Package = (*LogoutPackage)(nil)
 
-// LogoutPackage contains logout-options.
+// LogoutPackage is used to terminate and deallocate a connection.
 type LogoutPackage struct {
 	Options uint8
 }

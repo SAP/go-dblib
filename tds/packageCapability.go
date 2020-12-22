@@ -11,8 +11,7 @@ import (
 
 //go:generate stringer -type=CapabilityType
 
-// CapabilityType is the type for valuemask values of a capability
-// type valuemask.
+// CapabilityType is the type of capabilities.
 type CapabilityType byte
 
 // Types of capabilities.
@@ -24,8 +23,7 @@ const (
 
 //go:generate stringer -type=RequestCapability
 
-// RequestCapability is the type for valuemask values of a request
-// capability valuemask.
+// RequestCapability is the type for request capabilities.
 type RequestCapability int
 
 // Types of request capabilities.
@@ -140,8 +138,7 @@ const (
 
 //go:generate stringer -type=ResponseCapability
 
-// ResponseCapability is the type for valuemask values of a response
-// capability valuemask.
+// ResponseCapability is the type for response capabilities.
 type ResponseCapability int
 
 // Types of response capabilities.
@@ -221,24 +218,16 @@ const (
 	TDS_RES_DR_NOKILL
 )
 
-// SecurityCapability is the type for valuemask values of a security
-// capability valuemask.
+// SecurityCapability is the type for security capabilities.
 type SecurityCapability int
 
-// go:generate stringer -type=CapabilitySecurityValue
-
-// SecurityCapabilityValue is the type for valuemask values of a
-// security value valuemask.
-type CapabilitySecurityValue int
-
-// CapabilityPackage contains the map Capabilities that links
-// capability-types to a valuemask.
+// CapabilityPackage is used to communicate capabilities between clients
+// and servers.
 type CapabilityPackage struct {
 	Capabilities map[CapabilityType]*valueMask
 }
 
-// NewCapabilityPackage creates a capability-package by setting request,
-// response, and security capabilities.
+// NewCapabilityPackage returns a prepared CapabilityPackage.
 func NewCapabilityPackage(request []RequestCapability, response []ResponseCapability,
 	security []SecurityCapability) (*CapabilityPackage, error) {
 	pkg := &CapabilityPackage{
@@ -269,39 +258,39 @@ func NewCapabilityPackage(request []RequestCapability, response []ResponseCapabi
 	return pkg, nil
 }
 
-// SetRequestCapability sets the requested capabilities.
+// SetRequestCapability sets the requested capability.
 func (pkg *CapabilityPackage) SetRequestCapability(capability RequestCapability, enable bool) error {
 	return pkg.Capabilities[CapabilityRequest].setCapability(int(capability), enable)
 }
 
-// SetResponseCapability sets the response capabilities.
+// SetResponseCapability sets the response capability.
 func (pkg *CapabilityPackage) SetResponseCapability(capability ResponseCapability, enable bool) error {
 	return pkg.Capabilities[CapabilityResponse].setCapability(int(capability), enable)
 }
 
-// SetSecurityCapability sets the security capabilities.
+// SetSecurityCapability sets the security capability.
 func (pkg *CapabilityPackage) SetSecurityCapability(capability SecurityCapability, enable bool) error {
 	return pkg.Capabilities[CapabilitySecurity].setCapability(int(capability), enable)
 }
 
-// HasCapabilities returns whether the package has the passed capability.
+// HasCapability returns whether the package has the requested capability.
 func (pkg *CapabilityPackage) HasCapability(capabilityType CapabilityType, capability int) bool {
 	return pkg.Capabilities[capabilityType].getCapability(int(capability))
 }
 
-// HasRequestCapabilities returns whether the package has the passed
-// requested capability.
+// HasRequestCapability returns whether the package has the requested
+// request capability.
 func (pkg *CapabilityPackage) HasRequestCapability(capability RequestCapability) bool {
 	return pkg.HasCapability(CapabilityRequest, int(capability))
 }
 
-// HasResponseCapabilities returns whether the package has the passed
+// HasResponseCapabilities returns whether the package has the requested
 // response capability.
 func (pkg *CapabilityPackage) HasResponseCapability(capability ResponseCapability) bool {
 	return pkg.HasCapability(CapabilityResponse, int(capability))
 }
 
-// HasSecurityCapabilities returns whether the package has the passed
+// HasSecurityCapabilities returns whether the package has the requested
 // security capability.
 func (pkg *CapabilityPackage) HasSecurityCapability(capability SecurityCapability) bool {
 	return pkg.HasCapability(CapabilitySecurity, int(capability))

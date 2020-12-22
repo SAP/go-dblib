@@ -11,17 +11,16 @@ import (
 
 //go:generate stringer -type=EEDStatus
 
-// EEDStatus is the type for bitmask values of an EED status.
+// EEDStatus is used to indicate the status of an EED package.
 type EEDStatus uint8
 
-// States of an EED-package.
 const (
 	TDS_NO_EED      EEDStatus = 0x00
 	TDS_EED_FOLLOWS EEDStatus = 0x1
 	TDS_EED_INFO    EEDStatus = 0x2
 )
 
-// EEDPackage contains information about the EED.
+// EEDPackage is used to communicate information and error messages.
 type EEDPackage struct {
 	MsgNumber  uint32
 	State      uint8

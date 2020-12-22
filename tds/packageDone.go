@@ -40,8 +40,7 @@ const (
 	TDS_TRAN_STMT_FAIL   TransState = 0x4
 )
 
-// DonePackage contains information about the states of a done- and
-// trans-package.
+// DonePackage is used to finalize a package stream.
 type DonePackage struct {
 	Status    DoneState
 	TranState TransState

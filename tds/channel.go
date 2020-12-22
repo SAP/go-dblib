@@ -26,9 +26,10 @@ var (
 type Channel struct {
 	tdsConn *Conn
 
-	// The RWMutex isn't used in it intended from of reader/writer locks
-	// but rather allows multiple goroutines to acquire a read-lock to
-	// use the channel for sending/receiving packages.
+	// The RWMutex isn't used in its intended form of reader/writer
+	// locks but rather allows multiple goroutines to acquire
+	// a read-lock to use the channel for sending/receiving packages.
+	//
 	// The exclusive write lock is used to stop other goroutines from
 	// using the channel when closing it.
 	sync.RWMutex
@@ -42,7 +43,7 @@ type Channel struct {
 	eedHooks     []EEDHook
 	eedHooksLock *sync.Mutex
 
-	// currentHeaderType is the PacketHeaderType set on outgoing
+	// CurrentHeaderType is the PacketHeaderType set on outgoing
 	// packets.
 	CurrentHeaderType PacketHeaderType
 	// curPacketNr is the number of the next packet being sent
@@ -142,7 +143,8 @@ func (tdsChan *Channel) Reset() {
 	tdsChan.lastPkgTx = nil
 }
 
-// Close communicates the closing of the channel with the TDS server.
+// Close communicates the termination of the channel with the TDS
+// server.
 //
 // The teardown on client side is guaranteed, even if Close returns an
 // error. An error is only returned if the communication with the server
@@ -209,7 +211,7 @@ func (tdsChan *Channel) Close() error {
 	return me
 }
 
-// Logout implements the logout sequence.
+// Logout performs the logout sequence.
 func (tdsChan *Channel) Logout() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -349,18 +351,18 @@ func (tdsChan *Channel) NextPackage(ctx context.Context, wait bool) (Package, er
 // from an unwrapped io.EOF in processPkg and check if the error is not
 // of this error:
 //
-// _, err := ...NextPackageUntil(ctx, wait, func(pkg tds.Package) (bool, error) {
-//     switch pkg.(type) {
-//     case ...
-//         // handle communication
-//     case ...
-//         // handle final communication
-//         return true, DefinedError
-//     }
-// }
-// if err != nil && !errors.Is(err, DefinedError) {
-//     // error handling
-// }
+// 	_, err := ...NextPackageUntil(ctx, wait, func(pkg tds.Package) (bool, error) {
+// 	    switch pkg.(type) {
+// 	    case ...
+// 	        // handle communication
+// 	    case ...
+// 	        // handle final communication
+// 	        return true, DefinedError
+// 	    }
+// 	}
+// 	if err != nil && !errors.Is(err, DefinedError) {
+// 	    // error handling
+// 	}
 func (tdsChan *Channel) NextPackageUntil(ctx context.Context, wait bool, processPkg func(Package) (bool, error)) (Package, error) {
 	eedError := &EEDError{}
 
@@ -443,8 +445,7 @@ type LastPkgAcceptor interface {
 	LastPkg(Package) error
 }
 
-// QueuePackage utilizes PacketQueue to convert a Package into packets.
-// Packets that have their Data exhausted are sent to the server.
+// QueuePackages queues a package for transmission.
 func (tdsChan *Channel) QueuePackage(ctx context.Context, pkg Package) error {
 	tdsChan.RLock()
 	defer tdsChan.RUnlock()
@@ -557,8 +558,8 @@ func (tdsChan *Channel) sendPacket(packet *Packet) error {
 	return nil
 }
 
-// WritePacket received packets from the associated Conn and attempts
-// to produce Packages from the existing data.
+// WritePacket receives packets from the associated Conn and attempts to
+// produce Packages from the existing data.
 func (tdsChan *Channel) WritePacket(packet *Packet) {
 	tdsChan.RLock()
 	defer tdsChan.RUnlock()
