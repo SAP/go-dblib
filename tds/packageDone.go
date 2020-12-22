@@ -90,6 +90,7 @@ func (pkg DonePackage) WriteTo(ch BytesChannel) error {
 	return ch.WriteInt32(pkg.Count)
 }
 
+// String implements the fmt.Stringer interface.
 func (pkg DonePackage) String() string {
 	strStati := deBitmaskString(int(pkg.Status), int(TDS_DONE_CUMULATIVE),
 		func(i int) string { return DoneState(i).String() },
