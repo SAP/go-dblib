@@ -68,7 +68,7 @@ func NewLoginConfig(dsn *dsn.Info) (*LoginConfig, error) {
 	}
 
 	// Should be overwritten by clients
-	conf.AppName = "github.com/SAP/go-ase/libase/tds"
+	conf.AppName = "github.com/SAP/go-dblib/tds"
 
 	conf.CharSet = "utf8"
 	conf.Language = "us_english"
