@@ -8,19 +8,17 @@ import "fmt"
 
 //go:generate stringer -type=EnvChangeType
 
-// EnvChangeType is the type for bitmask values of environment
-// variable change types.
+// EnvChangeType signals which part of the environment was updated.
 type EnvChangeType uint8
 
-// Types of a changeable environment variable.
 const (
-	TDS_ENV_DB       EnvChangeType = 0x1
-	TDS_ENV_LANG     EnvChangeType = 0x2
-	TDS_ENV_CHARSET  EnvChangeType = 0x3
-	TDS_ENV_PACKSIZE EnvChangeType = 0x4
+	TDS_ENV_DB EnvChangeType = iota + 1
+	TDS_ENV_LANG
+	TDS_ENV_CHARSET
+	TDS_ENV_PACKSIZE
 )
 
-// EnvChangePackage contains members.
+// EnvChangePackage is used to communicate multiple environment changes.
 type EnvChangePackage struct {
 	members []EnvChangePackageField
 }
@@ -92,17 +90,13 @@ func (pkg EnvChangePackage) String() string {
 	return s + ")"
 }
 
-// EnvChangePackageField contains the environment variable type and the
-// new as well as the old value.
+// EnvChangePackageField is a single environment change.
 type EnvChangePackageField struct {
 	Type               EnvChangeType
 	NewValue, OldValue string
 }
 
-// ReadFrom reads bytes from the passed channel until either the channel
-// is closed or the package has all required information. The bytes are
-// stored in an EnvChangePackageField-struct and the amount of bytes
-// read returned.
+// ReadFrom implements the tds.Package interface.
 func (field *EnvChangePackageField) ReadFrom(ch BytesChannel) (int, error) {
 	// n is the amount of bytes read from channel
 	n := 0
@@ -145,10 +139,7 @@ func (field *EnvChangePackageField) ReadFrom(ch BytesChannel) (int, error) {
 	return n, nil
 }
 
-// WriteTo writes bytes from the passed channel until either the channel
-// is closed or the package has written all required information. The
-// information are based on an EnvChangePackageField and the amount of
-// written bytes are returned.
+// WriteTo implements the tds.Package interface.
 func (field EnvChangePackageField) WriteTo(ch BytesChannel) (int, error) {
 	if err := ch.WriteUint8(uint8(field.Type)); err != nil {
 		return 0, fmt.Errorf("error writing type: %w", err)
@@ -178,7 +169,7 @@ func (field EnvChangePackageField) WriteTo(ch BytesChannel) (int, error) {
 	return n, nil
 }
 
-// ByteLength returns the length of passed bytes.
+// ByteLength returns the length in bytes.
 func (field EnvChangePackageField) ByteLength() int {
 	// type byte
 	// + new value length byte + new value length

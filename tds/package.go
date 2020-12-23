@@ -29,7 +29,7 @@ type Package interface {
 	fmt.Stringer
 }
 
-// LookupPackage returns the package-struct linked to the passed token.
+// LookupPackage returns the Package struct for a token.
 func LookupPackage(token Token) (Package, error) {
 	switch token {
 	case TDS_EED:
@@ -81,8 +81,8 @@ func LookupPackage(token Token) (Package, error) {
 	}
 }
 
-// IsError returns true if the passed package is an EED- or
-// ErrorPackage.
+// IsError returns true if the package signals an error - either in
+// the communication or in the protocol.
 func IsError(pkg Package) bool {
 	switch pkg.(type) {
 	case *EEDPackage, *ErrorPackage:
@@ -92,7 +92,7 @@ func IsError(pkg Package) bool {
 	return false
 }
 
-// IsDone returns true if the passed package is a DonePackage.
+// IsDone returns true if the package terminates the stream.
 func IsDone(pkg Package) bool {
 	switch pkg.(type) {
 	case *DonePackage:
@@ -102,8 +102,8 @@ func IsDone(pkg Package) bool {
 	return false
 }
 
-// The BytesChannel interface is accepted by all packages' WriteTo and
-// ReadFrom methods.
+// BytesChannel defines the required methods for Packages to read and
+// write information to a stream.
 type BytesChannel interface {
 	// Position marks the index of the packet and index of the byte the
 	// channel currently is at.

@@ -10,11 +10,10 @@ import (
 	"github.com/SAP/go-dblib/asetypes"
 )
 
-// Interface statisfaction check.
 var _ Package = (*ParamFmtPackage)(nil)
 
-// ParamFmtPackage contains the field-format and differentiates between
-// TDS_PARAMFMT and TDS_PARAMFMT2.
+// ParamFmtPackage communicates the order and types of
+// arguments/parameters of statements or responses.
 type ParamFmtPackage struct {
 	Fmts []FieldFmt
 	// Wide differentiates TDS_PARAMFMT from TDS_PARAMFMT2 and considers
@@ -23,7 +22,7 @@ type ParamFmtPackage struct {
 	wide bool
 }
 
-// NewParamFmtPackage creates a new param-format-package.
+// NewParamFmtPackage returns a new ParamFmtPackage.
 func NewParamFmtPackage(wide bool, fmts ...FieldFmt) *ParamFmtPackage {
 	return &ParamFmtPackage{wide: wide, Fmts: fmts}
 }
@@ -94,8 +93,6 @@ func (pkg *ParamFmtPackage) ReadFrom(ch BytesChannel) error {
 
 // ReadFromField reads bytes from the passed channel until either the
 // channel is closed or the package has all required information.
-// The information are stored into a field-format and returned with the
-// amount of read bytes.
 func (pkg *ParamFmtPackage) ReadFromField(ch BytesChannel) (FieldFmt, int, error) {
 	nameLength, err := ch.Uint8()
 	if err != nil {
@@ -231,10 +228,8 @@ func (pkg ParamFmtPackage) WriteTo(ch BytesChannel) error {
 	return nil
 }
 
-// WriteToField writes bytes from the passed channel until either the
+// WriteToField writes bytes to the passed channel until either the
 // channel is closed or the package has written all required information.
-// The information are based on a field-format. At the end, the amount
-// of written bytes are returned.
 func (pkg ParamFmtPackage) WriteToField(ch BytesChannel, field FieldFmt) (int, error) {
 	if err := ch.WriteUint8(uint8(len(field.Name()))); err != nil {
 		return 0, fmt.Errorf("failed to write Name length: %w", err)

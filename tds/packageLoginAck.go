@@ -8,18 +8,16 @@ import "fmt"
 
 //go:generate stringer -type=LoginAckStatus
 
-// LoginAckStatus is the type for bitmask values of
-// a login-acknowledgment status.
+// LoginAckstatus indicates the state of the login negotiation.
 type LoginAckStatus uint8
 
-// States of a login-acknowledgment.
 const (
 	TDS_LOG_SUCCEED LoginAckStatus = 5 + iota
 	TDS_LOG_FAIL
 	TDS_LOG_NEGOTIATE
 )
 
-// LoginAckPackage contains information about the login-status.
+// LoginAckPackage communicates the state of the login negotiation.
 type LoginAckPackage struct {
 	Length         uint16
 	Status         LoginAckStatus

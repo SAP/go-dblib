@@ -8,15 +8,13 @@ import (
 	"fmt"
 )
 
-// Interface satisfaction check.
 var _ Package = (*OptionCmdPackage)(nil)
 
 //go:generate stringer -type=OptionCmd
 
-// OptionCmd is the type for bitmask values of an option-command.
+// OptionCmd defines the type of argument for an OptionCmdPackage.
 type OptionCmd uint
 
-// Commands of an option-command.
 const (
 	TDS_OPT_SET OptionCmd = iota + 1
 	TDS_OPT_DEFAULT
@@ -26,11 +24,9 @@ const (
 
 //go:generate stringer -type=OptionCmdOption
 
-// OptionCmdOption is the type for bitmask values of an option-command
-// option.
+// OptionCmdOption defines which option is being configured.
 type OptionCmdOption uint
 
-// Options of an option-command.
 const (
 	TDS_OPT_UNUSED OptionCmdOption = iota
 	TDS_OPT_DATEFIRST
@@ -85,7 +81,7 @@ const (
 	TDS_OPT_ISOLATION_MODE OptionCmdOption = iota + 52
 )
 
-// OptionCmdPackage contains the command, option and argument.
+// OptionCmdPackage is used to set or reset an option.
 type OptionCmdPackage struct {
 	Cmd    OptionCmd
 	Option OptionCmdOption
