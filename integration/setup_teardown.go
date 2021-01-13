@@ -13,9 +13,15 @@ import (
 	"github.com/SAP/go-dblib/dsn"
 )
 
-// SetupDB creates a database and sets .Database on the passed testDsn.
-func SetupDB(testDsn *dsn.Info) error {
-	db, err := sql.Open("ase", testDsn.AsSimple())
+// SetupDB creates a database and sets .Database on the passed info.
+func SetupDB(info interface{}) error {
+	ttf := dsn.TagToField(info, dsn.OnlyJSON)
+	field, ok := ttf["database"]
+	if !ok {
+		return fmt.Errorf("provided info does not have the 'database' field")
+	}
+
+	db, err := sql.Open("ase", dsn.FormatSimple(info))
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
@@ -45,14 +51,21 @@ func SetupDB(testDsn *dsn.Info) error {
 		return fmt.Errorf("failed to switch context to %s: %w", testDatabase, err)
 	}
 
-	testDsn.Database = testDatabase
+	field.SetString(testDatabase)
+
 	return nil
 }
 
 // TeardownDB deletes the database indicated by .Database of the passed
-// testDsn and unsets the member.
-func TeardownDB(testDsn *dsn.Info) error {
-	db, err := sql.Open("ase", testDsn.AsSimple())
+// info and unsets the member.
+func TeardownDB(info interface{}) error {
+	ttf := dsn.TagToField(info, dsn.OnlyJSON)
+	field, ok := ttf["database"]
+	if !ok {
+		return fmt.Errorf("provided info does not have the 'database' field")
+	}
+
+	db, err := sql.Open("ase", dsn.FormatSimple(info))
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
@@ -68,11 +81,12 @@ func TeardownDB(testDsn *dsn.Info) error {
 		return fmt.Errorf("failed to switch context to master: %w", err)
 	}
 
-	if _, err := conn.ExecContext(context.Background(), "drop database "+testDsn.Database); err != nil {
+	if _, err := conn.ExecContext(context.Background(), "drop database "+field.String()); err != nil {
 		return fmt.Errorf("failed to drop database: %w", err)
 	}
 
-	testDsn.Database = ""
+	field.SetString("")
+
 	return nil
 }
 
