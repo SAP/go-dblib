@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/SAP/go-dblib/dsn"
 )
 
 // LoginConfigRemoteServer contains the name and the password to the
@@ -22,7 +20,7 @@ type LoginConfigRemoteServer struct {
 
 // LoginConfig contains configuration to login to the server.
 type LoginConfig struct {
-	DSN      *dsn.Info
+	DSN      *Info
 	Hostname string
 
 	// TODO name
@@ -43,7 +41,7 @@ type LoginConfig struct {
 // NewLoginConfig creates a new login-configuration by using dsn
 // information and setting default configuration-values in regard to the
 // ASE database server (Should be be adjusted by clients).
-func NewLoginConfig(dsn *dsn.Info) (*LoginConfig, error) {
+func NewLoginConfig(dsn *Info) (*LoginConfig, error) {
 	conf := &LoginConfig{}
 
 	conf.DSN = dsn

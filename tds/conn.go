@@ -21,7 +21,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/SAP/go-dblib/dsn"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -32,7 +31,7 @@ import (
 type Conn struct {
 	conn io.ReadWriteCloser
 	Caps *CapabilityPackage
-	dsn  *dsn.Info
+	info *Info
 
 	odce odceCipher
 
@@ -52,25 +51,20 @@ type Conn struct {
 // A new child context will be created from the passed context and used
 // to abort any interaction with the server - hence closing the parent
 // context will abort all interaction with the server.
-func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
-	network := "tcp"
-	if prop := dsn.Prop("network"); prop != "" {
-		network = prop
-	}
-
+func NewConn(ctx context.Context, info *Info) (*Conn, error) {
 	// Dial returns a prepared and dialed Conn.
-	c, err := net.Dial(network, fmt.Sprintf("%s:%s", dsn.Host, dsn.Port))
+	c, err := net.Dial(info.Network, fmt.Sprintf("%s:%s", info.Host, info.Port))
 	if err != nil {
 		return nil, fmt.Errorf("error opening connection: %w", err)
 	}
 
-	if dsn.TLSEnable || strings.TrimSpace(strings.Replace(dsn.Port, "0", "", -1)) == "443" {
+	if info.TLSEnable || strings.TrimSpace(strings.Replace(info.Port, "0", "", -1)) == "443" {
 		tlsConfig := &tls.Config{}
-		tlsConfig.ServerName = dsn.Host
-		tlsConfig.InsecureSkipVerify = dsn.TLSSkipValidation
+		tlsConfig.ServerName = info.Host
+		tlsConfig.InsecureSkipVerify = info.TLSSkipValidation
 
-		if dsn.TLSHostname != "" {
-			hostname := dsn.TLSHostname
+		if info.TLSHostname != "" {
+			hostname := info.TLSHostname
 			if strings.HasPrefix(hostname, "CN=") {
 				hostname = strings.TrimPrefix(hostname, "CN=")
 			}
@@ -78,11 +72,11 @@ func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
 			tlsConfig.ServerName = hostname
 		}
 
-		if dsn.TLSCAFile != "" {
-			bs, err := ioutil.ReadFile(dsn.TLSCAFile)
+		if info.TLSCAFile != "" {
+			bs, err := ioutil.ReadFile(info.TLSCAFile)
 			if err != nil {
 				return nil, fmt.Errorf("error reading file at ssl-ca path '%s': %w",
-					dsn.TLSCAFile, err)
+					info.TLSCAFile, err)
 			}
 
 			tlsConfig.RootCAs = x509.NewCertPool()
@@ -97,7 +91,7 @@ func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
 				caCert, err := x509.ParseCertificate(block.Bytes)
 				if err != nil {
 					return nil, fmt.Errorf("error parsing CA PEM at ssl-ca path '%s': %w",
-						dsn.TLSCAFile, err)
+						info.TLSCAFile, err)
 				}
 
 				tlsConfig.RootCAs.AddCert(caCert)
@@ -108,7 +102,7 @@ func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
 			}
 
 			if len(tlsConfig.RootCAs.Subjects()) == 0 {
-				return nil, fmt.Errorf("could not parse any valid CA certificate from file '%s'", dsn.TLSCAFile)
+				return nil, fmt.Errorf("could not parse any valid CA certificate from file '%s'", info.TLSCAFile)
 			}
 		}
 
@@ -120,7 +114,7 @@ func NewConn(ctx context.Context, dsn *dsn.Info) (*Conn, error) {
 	}
 
 	tds := &Conn{
-		dsn:        dsn,
+		info:       info,
 		conn:       c,
 		packetSize: 512,
 	}
@@ -222,7 +216,7 @@ func (tds *Conn) ReadFrom() {
 		}
 
 		packet := &Packet{}
-		_, err := packet.ReadFrom(tds.ctx, tds.conn, time.Duration(tds.dsn.PacketReadTimeout)*time.Second)
+		_, err := packet.ReadFrom(tds.ctx, tds.conn, time.Duration(tds.info.PacketReadTimeout)*time.Second)
 		if err != nil && !errors.Is(err, io.EOF) {
 			tds.errCh <- fmt.Errorf("error reading packet: %w", err)
 			continue

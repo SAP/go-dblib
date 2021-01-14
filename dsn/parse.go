@@ -9,134 +9,102 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-
-	validator "gopkg.in/go-playground/validator.v9"
 )
 
-// ParseDSN parses a DSN into a Info struct.
-//
-// Accepted DSNs are either in URI or simple form:
-// URI: ase://user:pass@host:port?key=val
-// Simple: username=user password=password host=host port=port key=val
-//
-// To use special characters in your DSN use the simple form.
-//
-// When using the simple form values containing whitespaces must be
-// quoted with double or single quotation marks.
-//		username=user password="a password" host=host port=port
-//		username=user password='a password' host=host port=port
-//
-// The DSN is validated using the struct tags and validator.
-// Validation errors from validator are returned as-is for further
-// processing.
-func ParseDSN(dsn string) (*Info, error) {
-	var info *Info
-	var err error
-
-	// Parse DSN
-	if strings.HasPrefix(dsn, "ase:/") {
-		info, err = parseDsnUri(dsn)
-	} else {
-		info, err = parseDsnSimple(dsn)
-	}
-	if err != nil {
-		return nil, err
+// Parse uses ParseURI or ParseSimple and returns the respective error.
+// The decision is made based on the existence of "://" in the passed
+// string.
+func Parse(dsn string, target interface{}) error {
+	if strings.Contains(dsn, "://") {
+		return ParseURI(dsn, target)
 	}
 
-	var filterFn validator.FilterFunc = filterNoUserStoreKey
-	if info.Userstorekey != "" {
-		filterFn = filterUserStoreKey
-	}
-
-	v := validator.New()
-	if err = v.StructFiltered(info, filterFn); err != nil {
-		return nil, err
-	}
-
-	return info, nil
+	return ParseSimple(dsn, target)
 }
 
-// filterUserStoreKey is the validator.FilterFunc for a Info struct
-// with Userstorekey set.
-func filterUserStoreKey(ns []byte) bool {
-	switch string(ns) {
-	case "Info.Username":
-		return true
-	case "Info.Password":
-		return true
-	case "Info.Database":
-		return true
-	case "Info.Host":
-		return true
-	case "Info.Port":
-		return true
-	}
-	return false
-}
-
-// filterNoUserStoreKey is the validator.FilterFunc for a Info struct
-// with Userstorekey unset.
-func filterNoUserStoreKey(ns []byte) bool {
-	return string(ns) == "Info.Userstorekey"
-}
-
-// parseDsnUri parses a DSN in URI form and returns the resulting
-// Info.
-func parseDsnUri(dsn string) (*Info, error) {
+// ParseURI uses url.Parse to parse the passed string.
+//
+// Only members with json metadata tags will be filled. Additionally
+// multiref metadata tags are recognized.
+//
+// Hostname, Port, Username and Password are hardcoded to be set to
+// "hostname", "port", "username" and "password" respectively due to
+// technical limitations.
+//
+// If the "database" tag is set its member is set to the path of the
+// URI, sans the leading "/".
+func ParseURI(dsn string, target interface{}) error {
 	url, err := url.Parse(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse DSN using url.Parse: %v", err)
+		return fmt.Errorf("dsn: error parsing DSN using url.Parse: %w", err)
 	}
 
-	dsni := NewInfo()
-	dsni.Host = url.Hostname()
-	dsni.Port = url.Port()
-	dsni.ConnectProps = url.Query()
+	ttf := TagToField(target, Multiref)
 
-	// Assume that `astring` in the DSN ase://astring@hostname/ is the
-	// userstorekey. This is parsed as the username by url.Parse.
+	ttf["hostname"].SetString(url.Hostname())
+	ttf["port"].SetString(url.Port())
+
 	if url.User != nil {
-		username := url.User.Username()
-		password, ok := url.User.Password()
+		ttf["username"].SetString(url.User.Username())
+		pass, _ := url.User.Password()
+		ttf["password"].SetString(pass)
+	}
 
-		if ok {
-			// ase://username:password@hostname/
-			dsni.Username = username
-			dsni.Password = password
-		} else {
-			// ase://userstorekey@hostname/
-			dsni.Userstorekey = username
+	if database, ok := ttf["database"]; ok {
+		database.SetString(strings.TrimPrefix(url.Path, "/"))
+	}
+
+	props := url.Query()
+	for key, values := range props {
+		field, ok := ttf[key]
+		if !ok {
+			return fmt.Errorf("dsn: query value %q has no matching field", key)
+		}
+
+		if err := setValue(field, values[len(values)-1]); err != nil {
+			return fmt.Errorf("dsn: error setting field %s of kind %s to %q",
+				key, field.Kind(), values[len(values)-1])
 		}
 	}
 
-	// Check ConnectProps for any values that should be set in struct
-	ttf := dsni.tagToField(true)
-	for prop, values := range dsni.ConnectProps {
-		// Skip if values is empty
-		if len(values) == 0 {
-			continue
-		}
-
-		if _, ok := ttf[prop]; !ok {
-			// ConnectProp is not in struct
-			continue
-		}
-
-		if err := dsni.SetField(prop, values[len(values)-1]); err != nil {
-			return nil, fmt.Errorf("error setting field %s with value '%s': %w",
-				prop, values[len(values)-1], err)
-		}
-
-		dsni.ConnectProps.Del(prop)
-	}
-
-	return dsni, nil
+	return nil
 }
 
-// parseDsnSimple parses a DSN in the simple form and returns the
-// resulting Info without checking for missing values.
-func parseDsnSimple(dsn string) (*Info, error) {
-	dsni := NewInfo()
+// ParseSimple parses a simple DSN in the form of "key=value k2=v2".
+//
+// Only members with a json or multiref metadata tag will be filled.
+// Should be member have both json and multiref tags which occur
+// multiple times in the passed string the last occurrence will take
+// priority.
+//
+// ParseSimple supports whitespaces in values, but not in keys - given
+// that values are quoted with either double or single quotes.
+//
+// Example:
+//   type Example struct {
+//       // Recognized as "hostname", "host" and "remote"
+//       Host string `json:"hostname" multiref:"host,remote"`
+//       // Only recognized as "port"
+//       Port string `json:"port"`
+//       // Recognized as "database" and "db"
+//       Database string `json:"database" multiref:"db"`
+//       // Not recognized due to missing metadata
+//       Username string
+//   }
+//
+//   ex := new(Example)
+//   simple := `host="a.b.c.d" remote='w.x.y.z' port=ssl username="user"`
+//   if err := dsn.ParseSimple(simple, ex); err != nil {
+//       return err
+//   }
+//
+// Will result in :
+//   ex.Host being set to "w.x.y.z" as it's multiref tag 'remote' came last.
+//   ex.Port being set to "ssl".
+//   ex.Database not being set as no values were provided.
+//   ex.Username not being set as it has no metadata.
+func ParseSimple(dsn string, target interface{}) error {
+	ttf := TagToField(target, Multiref)
 
 	// Valid quotation marks to detect values with whitespaces
 	quotations := []byte{'\'', '"'}
@@ -165,7 +133,7 @@ func parseDsnSimple(dsn string) (*Info, error) {
 
 		partS := strings.SplitN(part, "=", 2)
 		if len(partS) != 2 {
-			return nil, fmt.Errorf("Recognized DSN part does not contain key/value parts: %s", partS)
+			return fmt.Errorf("dsn: recognized DSN part does not contain key/value parts: %q", partS)
 		}
 
 		key, value := partS[0], partS[1]
@@ -179,10 +147,16 @@ func parseDsnSimple(dsn string) (*Info, error) {
 			}
 		}
 
-		if err := dsni.SetField(key, value); err != nil {
-			return nil, fmt.Errorf("error setting value '%s' for field %s: %w", value, key, err)
+		field, ok := ttf[key]
+		if !ok {
+			return fmt.Errorf("no field for key %q", key)
+		}
+
+		if err := setValue(field, value); err != nil {
+			return fmt.Errorf("dsn: error setting field %s of kind %s to %q",
+				key, field.Kind(), value)
 		}
 	}
 
-	return dsni, nil
+	return nil
 }
