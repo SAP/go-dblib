@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"strconv"
 	"sync"
 	"time"
@@ -468,6 +469,9 @@ func (tdsChan *Channel) QueuePackage(ctx context.Context, pkg Package) error {
 	if err := pkg.WriteTo(tdsChan.queueTx); err != nil {
 		return fmt.Errorf("error queueing packets from package %s: %w", pkg, err)
 	}
+	if tdsChan.tdsConn.info.DebugLogPackages {
+		log.Printf("TX: %s", pkg)
+	}
 	tdsChan.lastPkgTx = pkg
 
 	return tdsChan.sendPackets(ctx, true)
@@ -653,6 +657,10 @@ func (tdsChan *Channel) tryParsePackage() bool {
 		// Parsing went wrong, record as error
 		tdsChan.errCh <- fmt.Errorf("error parsing package %T: %w", pkg, err)
 		return false
+	}
+
+	if tdsChan.tdsConn.info.DebugLogPackages {
+		log.Printf("RX: %s", pkg)
 	}
 
 	pass, err := tdsChan.handleSpecialPackage(pkg)
