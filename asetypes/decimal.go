@@ -80,6 +80,7 @@ func NewDecimal(precision, scale int) (*Decimal, error) {
 	dec := &Decimal{
 		Precision: precision,
 		Scale:     scale,
+		i:         new(big.Int),
 	}
 
 	if err := dec.sanity(); err != nil {
@@ -160,10 +161,6 @@ func (dec Decimal) ByteSize() int {
 
 // SetInt64 sets dec.i to i.
 func (dec *Decimal) SetInt64(i int64) {
-	if dec.i == nil {
-		dec.i = &big.Int{}
-	}
-
 	dec.i.SetInt64(i)
 }
 
@@ -177,10 +174,6 @@ func (dec Decimal) Int() *big.Int {
 // SetBytes interprets b as the bytes of a big-endian unsigned integer
 // and sets dec to that values.
 func (dec *Decimal) SetBytes(b []byte) {
-	if dec.i == nil {
-		dec.i = &big.Int{}
-	}
-
 	dec.i.SetBytes(b)
 }
 
