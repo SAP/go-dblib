@@ -173,6 +173,10 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 			return nil, fmt.Errorf("error creating decimal: %w", err)
 		}
 
+		if len(bs) == 0 {
+			return dec, nil
+		}
+
 		dec.SetBytes(bs[1:])
 		if bs[0] == 0x1 {
 			dec.Negate()
