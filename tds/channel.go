@@ -268,14 +268,18 @@ func (tdsChan *Channel) handleSpecialPackage(pkg Package) (bool, error) {
 }
 
 func (tdsChan *Channel) SetLastPkgRx(pkg Package) {
-	tdsChan.RLock()
-	defer tdsChan.RUnlock()
+	// Write lock needs to be used to prevent data races being detected
+	// despite data races not being possible.
+	tdsChan.Lock()
+	defer tdsChan.Unlock()
 	tdsChan.lastPkgRx = pkg
 }
 
 func (tdsChan *Channel) SetLastPkgTx(pkg Package) {
-	tdsChan.RLock()
-	defer tdsChan.RUnlock()
+	// Write lock needs to be used to prevent data races being detected
+	// despite data races not being possible.
+	tdsChan.Lock()
+	defer tdsChan.Unlock()
 	tdsChan.lastPkgTx = pkg
 }
 
