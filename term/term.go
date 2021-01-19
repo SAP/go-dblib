@@ -20,14 +20,12 @@ var (
 
 // Entrypoint controls the execution of the program by starting the
 // interactive command-line or executing the passed query or input-file.
-func Entrypoint(db *sql.DB) error {
-	flag.Parse()
-
-	if len(flag.Args()) == 0 && *fInputFile == "" {
+func Entrypoint(db *sql.DB, args []string) error {
+	if len(args) == 0 && *fInputFile == "" {
 		return Repl(db)
 	}
 
-	query := strings.Join(flag.Args(), " ") + ";"
+	query := strings.Join(args, " ") + ";"
 
 	if *fInputFile != "" {
 		bs, err := ioutil.ReadFile(*fInputFile)
