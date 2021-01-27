@@ -141,8 +141,7 @@ func (header *PacketHeader) ReadFrom(r io.Reader) (int64, error) {
 		return int64(n), fmt.Errorf("read %d of %d expected bytes from reader: %w", n, PacketHeaderSize, err)
 	}
 
-	m, err := header.Write(bs)
-	return int64(m), err
+	return header.Write(bs)
 }
 
 // Write implements io.Writer.
