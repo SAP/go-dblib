@@ -132,6 +132,7 @@ func (header PacketHeader) Read(bs []byte) (int64, error) {
 
 // ReadFrom implements io.ReaderFrom.
 func (header *PacketHeader) ReadFrom(r io.Reader) (int64, error) {
+	// TODO lots of allocations, needs to be reduced
 	bs := make([]byte, PacketHeaderSize)
 	n, err := r.Read(bs)
 	if err != nil || n != PacketHeaderSize {
