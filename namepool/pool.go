@@ -45,6 +45,7 @@ func (pool *pool) Acquire() *Name {
 	id := pool.idPool.Get().(*uint64)
 
 	return &Name{
+		pool: pool,
 		name: fmt.Sprintf(pool.format, *id),
 		id:   id,
 	}
@@ -53,6 +54,11 @@ func (pool *pool) Acquire() *Name {
 // Release returns a name to the name pool. The value name points to
 // will be reset to a default Name.
 func (pool *pool) Release(name *Name) {
+	// Prevent nil IDs in pool if a name gets release multiple times.
+	if name == nil || name.id == nil {
+		return
+	}
+
 	pool.idPool.Put(name.id)
 	*name = Name{}
 }
