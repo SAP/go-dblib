@@ -100,7 +100,7 @@ func (pkg CurFetchPackage) WriteTo(ch BytesChannel) error {
 		totalLength += 1 + len(pkg.Name)
 	}
 	if pkg.Type == TDS_CUR_ABS || pkg.Type == TDS_CUR_REL {
-		totalLength++
+		totalLength += 4
 	}
 
 	if err := ch.WriteUint16(uint16(totalLength)); err != nil {
