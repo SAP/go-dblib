@@ -80,7 +80,7 @@ func (pkg CurOpenPackage) WriteTo(ch BytesChannel) error {
 	//   1 name len
 	//   x name
 	// 1 status
-	totalLength := 5
+	totalLength := 4 + 1
 	if pkg.CursorID == 0 {
 		totalLength += 1 + len(pkg.Name)
 	}
