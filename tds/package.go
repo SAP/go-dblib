@@ -77,6 +77,22 @@ func LookupPackage(token Token) (Package, error) {
 		return &DynamicPackage{}, nil
 	case TDS_DYNAMIC2:
 		return &DynamicPackage{wide: true}, nil
+	case TDS_CURDECLARE:
+		return &CurDeclarePackage{}, nil
+	case TDS_CURDECLARE3:
+		return &CurDeclarePackage{wide: true}, nil
+	case TDS_CURINFO:
+		return &CurInfoPackage{}, nil
+	case TDS_CURINFO3:
+		return &CurInfoPackage{wide: true}, nil
+	case TDS_CUROPEN:
+		return &CurOpenPackage{}, nil
+	case TDS_CURFETCH:
+		return &CurFetchPackage{}, nil
+	case TDS_CURUPDATE:
+		return &CurUpdatePackage{}, nil
+	case TDS_CURDELETE:
+		return &CurDeletePackage{}, nil
 	default:
 		return NewTokenlessPackage(), nil
 	}

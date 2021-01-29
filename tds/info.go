@@ -26,6 +26,8 @@ type Info struct {
 
 	PacketReadTimeout       int `json:"packet-read-timeout" doc:"Time in seconds to wait before aborting a connection when no response is received from the server"`
 	ChannelPackageQueueSize int `json:"channel-package-queue-size" doc:"How many TDS packages can be queued in a TDS channel"`
+
+	DebugLogPackages bool `json:"debug-log-packages" doc:"Log packages as they are transmitted/received"`
 }
 
 func SetInfo(info *Info) error {
