@@ -278,7 +278,6 @@ func (pkg CurDeclarePackage) WriteTo(ch BytesChannel) error {
 	return nil
 }
 
-// String implements the fmt.Stringer interface.
 func (pkg CurDeclarePackage) String() string {
 	strOpts := deBitmaskString(int(pkg.Options), int(TDS_CUR_DOPT_RELLOCKSONCLOSE),
 		func(i int) string { return CursorOption(i).String() },

@@ -226,7 +226,6 @@ func (pkg CurInfoPackage) WriteTo(ch BytesChannel) error {
 	return nil
 }
 
-// String implements the fmt.Stringer interface.
 func (pkg CurInfoPackage) String() string {
 	wide := "nowide"
 	if pkg.wide {

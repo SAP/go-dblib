@@ -134,7 +134,6 @@ func (pkg CurFetchPackage) WriteTo(ch BytesChannel) error {
 	return nil
 }
 
-// String implements the fmt.Stringer interface.
 func (pkg CurFetchPackage) String() string {
 	return fmt.Sprintf("%T(%d, %s, %s, %d)", pkg, pkg.CursorID, pkg.Name, pkg.Type, pkg.RowNumber)
 }

@@ -131,7 +131,6 @@ func (pkg CurDeletePackage) WriteTo(ch BytesChannel) error {
 	return nil
 }
 
-// String implements the fmt.Stringer interface.
 func (pkg CurDeletePackage) String() string {
 	return fmt.Sprintf("%T(%d, %s, %s, %s)", pkg, pkg.CursorID, pkg.Name,
 		pkg.TableName, pkg.Status)
