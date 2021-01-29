@@ -11,11 +11,13 @@ import (
 	"github.com/SAP/go-dblib/asetypes"
 )
 
+// KeyPackage is used to communicate the row position of a cursor.
 type KeyPackage struct {
 	DataType asetypes.DataType
 	Value    interface{}
 }
 
+// ReadFrom implements the tds.Package interface.
 func (pkg *KeyPackage) ReadFrom(ch BytesChannel) error {
 	var length int
 
@@ -44,6 +46,7 @@ func (pkg *KeyPackage) ReadFrom(ch BytesChannel) error {
 	return nil
 }
 
+// WriteTo implements the tds.Package interface.
 func (pkg KeyPackage) WriteTo(ch BytesChannel) error {
 	if err := ch.WriteByte(byte(TDS_KEY)); err != nil {
 		return err
