@@ -17,7 +17,7 @@ const (
 	TDS_CUR_COPT_DEALLOC CursorCloseOption = 0x1
 )
 
-// TODO
+// CurClosePackage is used to close a cursor.
 type CurClosePackage struct {
 	CursorID int32
 	Name     string
