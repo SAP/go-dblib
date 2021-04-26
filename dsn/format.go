@@ -123,7 +123,7 @@ func FormatURI(input interface{}) (string, error) {
 		var v string
 		switch field.Kind() {
 		case reflect.String:
-			v = fmt.Sprintf("%s", field.String())
+			v = field.String()
 		case reflect.Int:
 			v = strconv.Itoa(int(field.Int()))
 		case reflect.Bool:
