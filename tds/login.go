@@ -13,6 +13,27 @@ import (
 	"github.com/SAP/go-dblib/asetypes"
 )
 
+type loginEncryptError struct {
+	msgIdExpect TDSMsgId
+	msgIdRecv   TDSMsgId
+}
+
+func (e *loginEncryptError) Error() string {
+	var reason string
+	switch e.msgIdRecv {
+	case TDS_MSG_SEC_ENCRYPT:
+		reason = "encrypted login protocol"
+	case TDS_MSG_SEC_ENCRYPT2:
+		reason = "extended encrypted password login protocol"
+	case TDS_MSG_SEC_ENCRYPT3:
+		reason = "Extended Plus Encrypted Password login protocol"
+	default:
+		return fmt.Sprintf("expected a login encryption message, but received %v", e.msgIdRecv)
+	}
+
+	return fmt.Sprintf("server only supports %s, at least On Demand Command Encryption is required: expected %v, received %v", reason, e.msgIdExpect, e.msgIdRecv)
+}
+
 // Login performs the login negotiation with the TDS server.
 func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 	if config == nil {
@@ -107,7 +128,7 @@ func (tdsChan *Channel) Login(ctx context.Context, config *LoginConfig) error {
 	}
 
 	if negotiationMsg.MsgId != TDS_MSG_SEC_ENCRYPT4 {
-		return fmt.Errorf("expected TDS_MSG_SEC_ENCRYPT4, received: %s", negotiationMsg.MsgId)
+		return &loginEncryptError{msgIdExpect: TDS_MSG_SEC_ENCRYPT4, msgIdRecv: negotiationMsg.MsgId}
 	}
 
 	pkg, err = tdsChan.NextPackage(ctx, true)
