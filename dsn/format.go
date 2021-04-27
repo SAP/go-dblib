@@ -103,9 +103,8 @@ func FormatSimple(input interface{}) string {
 // Will print:
 //   db://username:password@hostname:12345/?database=db1&connectProp1=false&connectProp2=connectionProperty
 //
-// (For more examples see format_test.go)
+// For more examples see format_test.go
 func FormatURI(input interface{}) (string, error) {
-
 	// Initialize URL-struct to store connection-values
 	urlValues := new(url.URL)
 	// Initialize user, password, host, and port variables since they
@@ -129,7 +128,7 @@ func FormatURI(input interface{}) (string, error) {
 		case reflect.Bool:
 			v = strconv.FormatBool(field.Bool())
 		default:
-			return "", fmt.Errorf("FormatURI: failed to transform the value of <%s=%v> to string", key, field.String())
+			return "", fmt.Errorf("dsn: failed to transform the value of <%s=%v> to string", key, field.String())
 		}
 
 		// continue if value is not set
