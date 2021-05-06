@@ -30,7 +30,7 @@ The package `go-dblib` is a shared library for the
 driver-implementations of [`go-ase`][purego] and [`cgo-ase`][cgo]. Thus, one of
 these implementations is required.
 
-## Download
+## Download and Installation
 
 The packages in this repo can be `go get` and imported as usual.
 
