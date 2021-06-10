@@ -9,8 +9,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 
 	"github.com/SAP/go-dblib/dsn"
+)
+
+var (
+	// ASE doesn't handle creating multiple databases concurrently well.
+	// To prevent spurious test errors the DBCreateLock is used to
+	// synchronise the goroutines creating databases.
+	DBCreateLock = new(sync.Mutex)
 )
 
 // SetupDB creates a database and sets .Database on the passed info.
@@ -38,6 +46,9 @@ func SetupDB(info interface{}) error {
 	}
 
 	testDatabase := "test" + RandomNumber()
+
+	DBCreateLock.Lock()
+	defer DBCreateLock.Unlock()
 
 	if _, err := conn.ExecContext(context.Background(), fmt.Sprintf("if db_id('%s') is not null drop database %s", testDatabase, testDatabase)); err != nil {
 		return fmt.Errorf("error on conditional drop of database: %w", err)
