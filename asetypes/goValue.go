@@ -54,7 +54,7 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 	case INTN:
 		switch len(bs) {
 		case 0:
-			return 0, nil
+			return nil, nil
 		case 1:
 			return INT1.GoValue(endian, bs)
 		case 2:
@@ -81,7 +81,7 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 	case UINTN:
 		switch len(bs) {
 		case 0:
-			return 0, nil
+			return nil, nil
 		case 1:
 			return INT1.GoValue(endian, bs)
 		case 2:
