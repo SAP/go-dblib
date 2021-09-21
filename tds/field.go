@@ -123,6 +123,10 @@ type FieldFmt interface {
 	// TODO: is this actually required when sending from client?
 	MaxLength() int64
 	setMaxLength(int64)
+	// DisplayMaxLength returns a best guess of the maximum length
+	// required to display the values of this column.
+	DisplayMaxLength() int64
+	setDisplayMaxLength(int64)
 
 	// ReadFrom reads bytes from the passed channel until either the
 	// channel is closed or the package has all required information.
@@ -183,6 +187,8 @@ type fieldFmtBase struct {
 
 	// length is the maximum length of the data type
 	maxLength int64
+	// displayMaxLength is set manually
+	displayMaxLength int64
 }
 
 // DataType implements the tds.FieldFmt interface.
@@ -295,6 +301,21 @@ func (field fieldFmtBase) setMaxLength(i int64) {
 // MaxLength implements the tds.FieldFmt interface.
 func (field fieldFmtBase) MaxLength() int64 {
 	return field.maxLength
+}
+
+func (field *fieldFmtBase) setDisplayMaxLength(i int64) {
+	field.displayMaxLength = i
+}
+
+// DisplayMaxLength implements the tds.FieldFmt interface.
+func (field fieldFmtBase) DisplayMaxLength() int64 {
+	if field.displayMaxLength > 0 {
+		return field.displayMaxLength
+	}
+	if field.MaxLength() > 0 && field.MaxLength() <= 30 {
+		return field.MaxLength()
+	}
+	return 30
 }
 
 func (field *fieldFmtBase) readFromBase(ch BytesChannel) (int, error) {
