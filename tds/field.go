@@ -294,7 +294,7 @@ func (field fieldFmtBase) LengthBytes() int {
 	return field.DataType().LengthBytes()
 }
 
-func (field fieldFmtBase) setMaxLength(i int64) {
+func (field *fieldFmtBase) setMaxLength(i int64) {
 	field.maxLength = i
 }
 
