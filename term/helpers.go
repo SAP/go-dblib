@@ -71,7 +71,13 @@ func rawProcess(driverConn interface{}, query string) error {
 	return nil
 }
 
+type rowsColumnTypeDisplayLengther interface {
+	ColumnTypeDisplayLength(int) (int64, bool)
+}
+
 func processRows(rows driver.Rows) error {
+	rowsColumnTypeDisplayLength, _ := rows.(rowsColumnTypeDisplayLengther)
+
 	rowsColumnTypeLength, ok := rows.(driver.RowsColumnTypeLength)
 	if !ok {
 		return errors.New("rows does not support driver.RowsColumnTypLength")
@@ -95,8 +101,15 @@ func processRows(rows driver.Rows) error {
 		cellLen := len(colName)
 
 		colTypeLen, ok := rowsColumnTypeLength.ColumnTypeLength(i)
-		if ok {
+		if ok && int(colTypeLen) > cellLen {
 			cellLen = int(colTypeLen)
+		}
+
+		if rowsColumnTypeDisplayLength != nil {
+			colTypeLen, ok := rowsColumnTypeDisplayLength.ColumnTypeDisplayLength(i)
+			if ok && int(colTypeLen) > cellLen {
+				cellLen = int(colTypeLen)
+			}
 		}
 
 		if cellLen > *fMaxColPrintLength {
@@ -123,9 +136,9 @@ func processRows(rows driver.Rows) error {
 		for i, cell := range cells {
 			s := " %-" + strconv.Itoa(colLengths[i]) + "v |"
 			switch rowsColumnTypeName.ColumnTypeDatabaseTypeName(i) {
-			case "DECIMAL":
+			case "DECIMAL", "DECN", "NUMN":
 				fmt.Printf(s, cell.(*asetypes.Decimal).String())
-			case "IMAGE":
+			case "IMAGE", "BINARY", "LONGBINARY", "VARBINARY":
 				b := hex.EncodeToString(cell.([]byte))
 				if len(b) > colLengths[i] {
 					fmt.Printf(s, b[:colLengths[i]])
