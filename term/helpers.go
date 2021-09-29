@@ -21,7 +21,8 @@ import (
 )
 
 var (
-	fMaxColPrintLength = flag.Int("maxColLength", 50, "Maximum number of characters to print for column")
+	fMaxColPrintLength = flag.Int("max-col-length", 50, "Maximum number of characters to print for column")
+	fPrintColType      = flag.Bool("print-col-type", false, "Display the column type next to the column name")
 )
 
 // GenericExecer is the interface providing the GenericExec method.
@@ -99,6 +100,10 @@ func processRows(rows driver.Rows) error {
 	fmt.Printf("|")
 	for i, colName := range colNames {
 		cellLen := len(colName)
+		typeName := rowsColumnTypeName.ColumnTypeDatabaseTypeName(i)
+		if *fPrintColType {
+			cellLen += 1 + len(typeName)
+		}
 
 		colTypeLen, ok := rowsColumnTypeLength.ColumnTypeLength(i)
 		if ok && int(colTypeLen) > cellLen {
@@ -115,8 +120,15 @@ func processRows(rows driver.Rows) error {
 		if cellLen > *fMaxColPrintLength {
 			cellLen = *fMaxColPrintLength
 		}
+
 		s := " %-" + strconv.Itoa(cellLen) + "s |"
-		fmt.Printf(s, colName)
+
+		if *fPrintColType {
+			fmt.Printf(s, colName+" "+typeName)
+		} else {
+			fmt.Printf(s, colName)
+		}
+
 		colLengths[i] = cellLen
 	}
 	fmt.Printf("\n")
@@ -133,22 +145,25 @@ func processRows(rows driver.Rows) error {
 		}
 
 		fmt.Printf("|")
+
 		for i, cell := range cells {
-			s := " %-" + strconv.Itoa(colLengths[i]) + "v |"
+			var cellS string
 			switch rowsColumnTypeName.ColumnTypeDatabaseTypeName(i) {
 			case "DECIMAL", "DECN", "NUMN":
-				fmt.Printf(s, cell.(*asetypes.Decimal).String())
+				cellS = cell.(*asetypes.Decimal).String()
 			case "IMAGE", "BINARY", "LONGBINARY", "VARBINARY":
-				b := hex.EncodeToString(cell.([]byte))
-				if len(b) > colLengths[i] {
-					fmt.Printf(s, b[:colLengths[i]])
-				} else {
-					fmt.Printf(s, b)
-				}
+				cellS = hex.EncodeToString(cell.([]byte))
 			default:
-				fmt.Printf(s, (interface{})(cell))
+				cellS = fmt.Sprintf("%v", (interface{})(cell))
 			}
+
+			if len(cellS) > colLengths[i] {
+				cellS = cellS[:colLengths[i]-3] + "..."
+			}
+
+			fmt.Printf(" %-"+strconv.Itoa(colLengths[i])+"v |", cellS)
 		}
+
 		fmt.Printf("\n")
 	}
 
