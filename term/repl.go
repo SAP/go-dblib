@@ -55,41 +55,42 @@ func Repl(db *sql.DB) error {
 	for {
 		UpdatePrompt()
 
-		exitAfterExecution := false
+		line, readlineErr := rl.Readline()
+		line = strings.TrimSpace(line)
 
-		line, err := rl.Readline()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				// Execute the currently read line and then return
-				exitAfterExecution = true
-			} else {
-				return fmt.Errorf("term: received error from readline: %w", err)
-			}
+		// exit immediately on non-EOF errors
+		if readlineErr != nil && !errors.Is(readlineErr, io.EOF) {
+			return fmt.Errorf("term: received error from readline: %w", err)
 		}
 
-		line = strings.TrimSpace(line)
-		if line != "" {
+		// Only add non empty lines
+		if len(line) > 0 {
 			cmds = append(cmds, line)
 		}
 
-		if !strings.HasSuffix(line, ";") && !exitAfterExecution {
+		// exit if no statements are present and EOF is given
+		if errors.Is(readlineErr, io.EOF) && len(cmds) == 0 {
+			return nil
+		}
+
+		// Start multiline if query is not finished
+		if !strings.HasSuffix(line, ";") && len(line) > 0 {
 			promptMultiline = true
 			continue
 		}
 
-		// command is finished, reset and execute
+		// Command is finished, reset prompt and execute
 		promptMultiline = false
 
 		line = strings.Join(cmds, " ")
 		cmds = []string{}
 
-		err = ParseAndExecQueries(db, line)
-		if exitAfterExecution {
-			return err
+		if err := ParseAndExecQueries(db, line); err != nil {
+			log.Println(err)
 		}
 
-		if err != nil {
-			log.Println(err)
+		if errors.Is(readlineErr, io.EOF) {
+			return nil
 		}
 	}
 }
