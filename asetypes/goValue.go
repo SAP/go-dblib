@@ -146,26 +146,25 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 		s = strings.TrimRight(s, "\x00")
 
 		return s, nil
-	case MONEY:
+	case SHORTMONEY, MONEY, MONEYN:
 		dec, err := NewDecimal(ASEMoneyPrecision, ASEMoneyScale)
 		if err != nil {
 			return nil, fmt.Errorf("error creating decimal: %w", err)
 		}
 
-		mnyhigh := endian.Uint32(bs[:4])
-		mnylow := endian.Uint32(bs[4:])
+		switch len(bs) {
+		case 0: // MONEYN when nil
+			return dec, nil
+		case 4: // SHORTMONEY
+			dec.SetInt64(int64(int32(endian.Uint32(bs))))
+		case 8: // MONEY / MONEYN
+			mnyhigh := endian.Uint32(bs[:4])
+			mnylow := endian.Uint32(bs[4:])
 
-		mny := int64(int64(mnyhigh)<<32 + int64(mnylow))
-		dec.SetInt64(mny)
-
-		return dec, nil
-	case SHORTMONEY:
-		dec, err := NewDecimal(ASEShortMoneyPrecision, ASEShortMoneyScale)
-		if err != nil {
-			return nil, fmt.Errorf("error creating decimal: %w", err)
+			mny := int64(int64(mnyhigh)<<32 + int64(mnylow))
+			dec.SetInt64(mny)
 		}
 
-		dec.SetInt64(int64(int32(endian.Uint32(bs))))
 		return dec, nil
 	case DECN, NUMN:
 		dec, err := NewDecimal(ASEDecimalDefaultPrecision, ASEDecimalDefaultScale)
