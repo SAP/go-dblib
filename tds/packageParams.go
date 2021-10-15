@@ -116,5 +116,9 @@ func (pkg ParamsPackage) WriteTo(ch BytesChannel) error {
 }
 
 func (pkg ParamsPackage) String() string {
-	return fmt.Sprintf("%T(%d): ", pkg, len(pkg.DataFields))
+	s := make([]string, len(pkg.DataFields))
+	for i, field := range pkg.DataFields {
+		s[i] = fmt.Sprintf("%v", field.Value())
+	}
+	return fmt.Sprintf("%T(%d): %s", pkg, len(pkg.DataFields), s)
 }
