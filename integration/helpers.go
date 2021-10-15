@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 // DBTestFunc is the interface for tests accepting a pre-connected
@@ -34,6 +35,11 @@ func TestForEachDB(testName string, t *testing.T, testFn DBTestFunc) {
 			},
 		)
 	}
+}
+
+func init() {
+	// Set seed for RandomNumber
+	rand.Seed(time.Now().Unix())
 }
 
 // RandomNumber returns an unsecure random number as a string.
