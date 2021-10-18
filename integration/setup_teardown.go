@@ -139,7 +139,7 @@ func SetupDB(ctx context.Context, info interface{}, dbname string) error {
 	}
 
 	if err := waitForDBInSysdatabases(ctx, db, dbname); err != nil {
-		return fmt.Errorf("integration: error waiting for database %q to available in master..sysdatabases: %w", dbname, err)
+		return fmt.Errorf("integration: error waiting for database %q to be available in master..sysdatabases: %w", dbname, err)
 	}
 
 	if _, err := conn.ExecContext(ctx, "use "+dbname); err != nil {
