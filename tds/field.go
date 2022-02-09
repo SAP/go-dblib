@@ -86,7 +86,7 @@ const (
 type FieldFmt interface {
 	// Format information as sent to or received from TDS server
 	DataType() asetypes.DataType
-	setDataType(asetypes.DataType)
+	SetDataType(asetypes.DataType)
 	SetName(string)
 	Name() string
 
@@ -197,7 +197,7 @@ func (field fieldFmtBase) DataType() asetypes.DataType {
 	return field.dataType
 }
 
-func (field *fieldFmtBase) setDataType(t asetypes.DataType) {
+func (field *fieldFmtBase) SetDataType(t asetypes.DataType) {
 	field.dataType = t
 }
 
@@ -436,7 +436,7 @@ func (field fieldDataBase) writeTo(ch BytesChannel) (int, error) {
 		return n, err
 	}
 
-	bs, err := field.fmt.DataType().Bytes(endian, field.value)
+	bs, err := field.fmt.DataType().Bytes(endian, field.value, field.fmt.MaxLength())
 	if err != nil {
 		return n, fmt.Errorf("error converting field value to bytes: %w", err)
 	}
@@ -1275,72 +1275,90 @@ func LookupFieldFmt(dataType asetypes.DataType) (FieldFmt, error) {
 		f.setDisplayMaxLength(32)
 	case asetypes.BIT:
 		f = &BitFieldFmt{}
+		f.setMaxLength(1)
 		// Based on the default output when string formatting time.Date
 		// with padding for e.g. GMT+10
 		f.setDisplayMaxLength(32)
 	case asetypes.DATETIME:
 		f = &DateTimeFieldFmt{}
+		f.setMaxLength(8)
 		// Based on the default output when string formatting time.Date
 		// with padding for e.g. GMT+10
 		f.setDisplayMaxLength(32)
 	case asetypes.DATE:
 		f = &DateFieldFmt{}
+		f.setMaxLength(4)
 		// Based on the default output when string formatting time.Date
 		// with padding for e.g. GMT+10
 		f.setDisplayMaxLength(32)
 	case asetypes.SHORTDATE:
 		f = &ShortDateFieldFmt{}
+		f.setMaxLength(4)
 		// Based on the default output when string formatting time.Date
 		// with padding for e.g. GMT+10
 		f.setDisplayMaxLength(32)
 	case asetypes.FLT4:
 		f = &Flt4FieldFmt{}
+		f.setMaxLength(4)
 		// Educated guess, no sane and precise default possible
 		f.setDisplayMaxLength(20)
 	case asetypes.FLT8:
 		f = &Flt8FieldFmt{}
+		f.setMaxLength(8)
 		// Educated guess, no sane and precise default possible
 		f.setDisplayMaxLength(20)
 	case asetypes.INT1:
 		f = &Int1FieldFmt{}
+		f.setMaxLength(1)
 		f.setDisplayMaxLength(3)
 	case asetypes.INT2:
 		f = &Int2FieldFmt{}
+		f.setMaxLength(2)
 		// including sign
 		f.setDisplayMaxLength(6)
 	case asetypes.INT4:
 		f = &Int4FieldFmt{}
+		f.setMaxLength(4)
 		// including sign
 		f.setDisplayMaxLength(11)
 	case asetypes.INT8:
 		f = &Int8FieldFmt{}
+		f.setMaxLength(8)
 		// including sign
 		f.setDisplayMaxLength(20)
 	case asetypes.INTERVAL:
 		f = &IntervalFieldFmt{}
+		f.setMaxLength(8)
 	case asetypes.SINT1:
 		f = &Sint1FieldFmt{}
+		f.setMaxLength(1)
 		// including sign
 		f.setDisplayMaxLength(4)
 	case asetypes.UINT2:
 		f = &Uint2FieldFmt{}
+		f.setMaxLength(2)
 		f.setDisplayMaxLength(5)
 	case asetypes.UINT4:
 		f = &Uint4FieldFmt{}
+		f.setMaxLength(4)
 		f.setDisplayMaxLength(10)
 	case asetypes.UINT8:
 		f = &Uint8FieldFmt{}
+		f.setMaxLength(8)
 		f.setDisplayMaxLength(20)
 	case asetypes.MONEY:
 		f = &MoneyFieldFmt{}
+		f.setMaxLength(8)
 		// Maximum for MONEY with sign
 		f.setDisplayMaxLength(15)
 	case asetypes.SHORTMONEY:
 		f = &ShortMoneyFieldFmt{}
+		f.setMaxLength(4)
 		// Maximum for SHORTMONEY with sign
 		f.setDisplayMaxLength(10)
 	case asetypes.TIME:
 		f = &TimeFieldFmt{}
+		f.setMaxLength(4)
 		// Based on the default output when string formatting time.Date
 		// with padding for e.g. GMT+10
 		f.setDisplayMaxLength(32)
@@ -1413,7 +1431,7 @@ func LookupFieldFmt(dataType asetypes.DataType) (FieldFmt, error) {
 		return nil, fmt.Errorf("unhandled datatype '%s'", dataType)
 	}
 
-	f.setDataType(dataType)
+	f.SetDataType(dataType)
 	return f, nil
 }
 
