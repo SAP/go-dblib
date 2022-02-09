@@ -29,7 +29,7 @@ func DoTestSQLExec(t *testing.T) {
 }
 
 func testSQLExecNoCancel(t *testing.T, db *sql.DB, tableName string) {
-	if _, err := db.ExecContext(context.Background(), fmt.Sprintf("create table %s (a int)", tableName)); err != nil {
+	if _, err := db.ExecContext(context.Background(), fmt.Sprintf("create table %s (a bigint)", tableName)); err != nil {
 		t.Errorf("Error creating table: %s: %v", tableName, err)
 		return
 	}

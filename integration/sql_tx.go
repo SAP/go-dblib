@@ -28,7 +28,7 @@ func DoTestSQLTx(t *testing.T) {
 }
 
 func testSQLTxCommit(t *testing.T, db *sql.DB, tableName string) {
-	if _, err := db.Exec(fmt.Sprintf("create table %s (a int)", tableName)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("create table %s (a bigint)", tableName)); err != nil {
 		t.Errorf("Error creating table %s: %v", tableName, err)
 		return
 	}
@@ -77,7 +77,7 @@ func testSQLTxCommit(t *testing.T, db *sql.DB, tableName string) {
 }
 
 func testSQLTxRollback(t *testing.T, db *sql.DB, tableName string) {
-	if _, err := db.Exec(fmt.Sprintf("create table %s (a int)", tableName)); err != nil {
+	if _, err := db.Exec(fmt.Sprintf("create table %s (a bigint)", tableName)); err != nil {
 		t.Errorf("Error creating table %s: %v", tableName, err)
 		return
 	}

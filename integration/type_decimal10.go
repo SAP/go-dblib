@@ -21,8 +21,11 @@ func DoTestDecimal10(t *testing.T) {
 }
 
 func testDecimal10(t *testing.T, db *sql.DB, tableName string) {
+	// insert is the amount of insertions (see fn SetupTableInsert)
+	insert := 2
+
 	pass := make([]interface{}, len(samplesDecimal10))
-	mySamples := make([]*asetypes.Decimal, len(samplesDecimal10))
+	mySamples := make([]*asetypes.Decimal, len(samplesDecimal10)*insert)
 
 	for i, sample := range samplesDecimal10 {
 
@@ -34,7 +37,12 @@ func testDecimal10(t *testing.T, db *sql.DB, tableName string) {
 		}
 
 		pass[i] = mySample
-		mySamples[i] = mySample
+
+		// Add passed sample for the later validation (for every
+		// insert)
+		for j := 0; j < insert; j++ {
+			mySamples[i+(len(samplesDecimal10)*j)] = mySample
+		}
 	}
 
 	rows, teardownFn, err := SetupTableInsert(db, tableName, "decimal(1,0)", pass...)
@@ -67,7 +75,7 @@ func testDecimal10(t *testing.T, db *sql.DB, tableName string) {
 		t.Errorf("Error preparing rows: %v", err)
 	}
 
-	if i != len(pass) {
-		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass))
+	if i != len(pass)*insert {
+		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass)*insert)
 	}
 }

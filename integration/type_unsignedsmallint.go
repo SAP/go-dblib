@@ -19,15 +19,23 @@ func DoTestUnsignedSmallInt(t *testing.T) {
 }
 
 func testUnsignedSmallInt(t *testing.T, db *sql.DB, tableName string) {
+	// insert is the amount of insertions (see fn SetupTableInsert)
+	insert := 2
+
 	pass := make([]interface{}, len(samplesUnsignedSmallInt))
-	mySamples := make([]uint16, len(samplesUnsignedSmallInt))
+	mySamples := make([]uint16, len(samplesUnsignedSmallInt)*insert)
 
 	for i, sample := range samplesUnsignedSmallInt {
 
 		mySample := sample
 
 		pass[i] = mySample
-		mySamples[i] = mySample
+
+		// Add passed sample for the later validation (for every
+		// insert)
+		for j := 0; j < insert; j++ {
+			mySamples[i+(len(samplesUnsignedSmallInt)*j)] = mySample
+		}
 	}
 
 	rows, teardownFn, err := SetupTableInsert(db, tableName, "unsigned smallint", pass...)
@@ -60,7 +68,7 @@ func testUnsignedSmallInt(t *testing.T, db *sql.DB, tableName string) {
 		t.Errorf("Error preparing rows: %v", err)
 	}
 
-	if i != len(pass) {
-		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass))
+	if i != len(pass)*insert {
+		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass)*insert)
 	}
 }

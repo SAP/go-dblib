@@ -19,15 +19,23 @@ func DoTestText(t *testing.T) {
 }
 
 func testText(t *testing.T, db *sql.DB, tableName string) {
+	// insert is the amount of insertions (see fn SetupTableInsert)
+	insert := 2
+
 	pass := make([]interface{}, len(samplesText))
-	mySamples := make([]string, len(samplesText))
+	mySamples := make([]string, len(samplesText)*insert)
 
 	for i, sample := range samplesText {
 
 		mySample := sample
 
 		pass[i] = mySample
-		mySamples[i] = mySample
+
+		// Add passed sample for the later validation (for every
+		// insert)
+		for j := 0; j < insert; j++ {
+			mySamples[i+(len(samplesText)*j)] = mySample
+		}
 	}
 
 	rows, teardownFn, err := SetupTableInsert(db, tableName, "text null", pass...)
@@ -60,7 +68,7 @@ func testText(t *testing.T, db *sql.DB, tableName string) {
 		t.Errorf("Error preparing rows: %v", err)
 	}
 
-	if i != len(pass) {
-		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass))
+	if i != len(pass)*insert {
+		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass)*insert)
 	}
 }

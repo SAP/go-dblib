@@ -42,8 +42,7 @@ func DoTest{{.ASEType}}(t *testing.T) {
 }
 
 func test{{.ASEType}}(t *testing.T, db *sql.DB, tableName string) {
-	// insert displays the number of executions of the insertions
-	// (see fn SetupTableInsert)
+	// insert is the amount of insertions (see fn SetupTableInsert)
 	insert := 2
 
 	pass := make([]interface{}, len(samples{{.ASEType}}))

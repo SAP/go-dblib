@@ -17,7 +17,7 @@ func DoTestSQLQueryRow(t *testing.T) {
 }
 
 func testSQLQueryRowSingleRow(t *testing.T, db *sql.DB, tableName string) {
-	if _, err := db.Exec("create table " + tableName + " (a int, b varchar(30))"); err != nil {
+	if _, err := db.Exec("create table " + tableName + " (a bigint, b varchar(30))"); err != nil {
 		t.Errorf("error creating table %s: %v", tableName, err)
 		return
 	}
@@ -50,7 +50,7 @@ func testSQLQueryRowSingleRow(t *testing.T, db *sql.DB, tableName string) {
 }
 
 func testSQLQueryRowMultipleRows(t *testing.T, db *sql.DB, tableName string) {
-	if _, err := db.Exec("create table " + tableName + " (a int, b varchar(30))"); err != nil {
+	if _, err := db.Exec("create table " + tableName + " (a bigint, b varchar(30))"); err != nil {
 		t.Errorf("error creating table %s: %v", tableName, err)
 		return
 	}
