@@ -149,13 +149,18 @@ func processRows(rows driver.Rows) error {
 
 		for i, cell := range cells {
 			var cellS string
-			switch rowsColumnTypeName.ColumnTypeDatabaseTypeName(i) {
-			case "DECIMAL", "DECN", "NUMN":
-				cellS = cell.(*asetypes.Decimal).String()
-			case "IMAGE", "BINARY", "LONGBINARY", "VARBINARY":
-				cellS = hex.EncodeToString(cell.([]byte))
-			default:
-				cellS = fmt.Sprintf("%v", (interface{})(cell))
+			// Handle non-nil values
+			if cell == nil {
+				cellS = "<nil>"
+			} else {
+				switch rowsColumnTypeName.ColumnTypeDatabaseTypeName(i) {
+				case "DECIMAL", "DECN", "NUMN":
+					cellS = cell.(*asetypes.Decimal).String()
+				case "IMAGE", "BINARY", "LONGBINARY", "VARBINARY":
+					cellS = hex.EncodeToString(cell.([]byte))
+				default:
+					cellS = fmt.Sprintf("%v", (interface{})(cell))
+				}
 			}
 
 			if len(cellS) > colLengths[i] {
