@@ -105,7 +105,7 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 	case FLTN:
 		switch len(bs) {
 		case 0:
-			return 0, nil
+			return nil, nil
 		case 4:
 			return FLT4.GoValue(endian, bs)
 		case 8:
@@ -119,9 +119,15 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 		}
 		return false, nil
 	case LONGBINARY, BINARY, VARBINARY, IMAGE:
+		if len(bs) == 0 {
+			return nil, nil
+		}
 		// Noop
 		return bs, nil
 	case CHAR, VARCHAR, TEXT, LONGCHAR:
+		if len(bs) == 0 {
+			return nil, nil
+		}
 		return string(bs), nil
 	case UNITEXT:
 		runes := []rune{}
@@ -148,17 +154,23 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 
 		return s, nil
 	case SHORTMONEY, MONEY, MONEYN:
-		dec, err := NewDecimal(ASEMoneyPrecision, ASEMoneyScale)
+		dec, err := NewDecimal(0, 0)
 		if err != nil {
 			return nil, fmt.Errorf("error creating decimal: %w", err)
 		}
 
 		switch len(bs) {
-		case 0: // MONEYN when nil
-			return dec, nil
-		case 4: // SHORTMONEY
+		case 0:
+			return &Decimal{i: nil}, nil
+		case 4:
+			dec.Precision = ASEShortMoneyPrecision
+			dec.Scale = ASEShortMoneyScale
+
 			dec.SetInt64(int64(int32(endian.Uint32(bs))))
-		case 8: // MONEY / MONEYN
+		case 8:
+			dec.Precision = ASEMoneyPrecision
+			dec.Scale = ASEMoneyScale
+
 			mnyhigh := endian.Uint32(bs[:4])
 			mnylow := endian.Uint32(bs[4:])
 
@@ -168,13 +180,13 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 
 		return dec, nil
 	case DECN, NUMN:
+		if len(bs) == 0 {
+			return &Decimal{i: nil}, nil
+		}
+
 		dec, err := NewDecimal(ASEDecimalDefaultPrecision, ASEDecimalDefaultScale)
 		if err != nil {
 			return nil, fmt.Errorf("error creating decimal: %w", err)
-		}
-
-		if len(bs) == 0 {
-			return dec, nil
 		}
 
 		dec.SetBytes(bs[1:])
@@ -184,49 +196,68 @@ func (t DataType) goValue(endian binary.ByteOrder, bs []byte) (interface{}, erro
 
 		// User must set precision and scale
 		return dec, nil
-	case DATE:
+	case DATE, DATEN:
+		if len(bs) == 0 {
+			return nil, nil
+		}
+
 		x := int32(endian.Uint32(bs))
 		days := asetime.ASEDuration(x) * asetime.Day
 		return asetime.Epoch1900().AddDate(0, 0, days.Days()), nil
-	case TIME:
-		x := int(int32(endian.Uint32(bs)))
-		dur := asetime.FractionalSecondToMillisecond(x)
-		t := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
-		return t.Add(time.Duration(dur.Milliseconds()) * time.Millisecond), nil
-	case SHORTDATE:
-		days := endian.Uint16(bs[:2])
-		mins := endian.Uint16(bs[2:])
+	case TIME, BIGTIMEN, TIMEN:
+		switch len(bs) {
+		case 0: // Null
+			return nil, nil
+		case 4: // TIME
+			x := int(int32(endian.Uint32(bs)))
+			dur := asetime.FractionalSecondToMillisecond(x)
+			t := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
+			return t.Add(time.Duration(dur.Milliseconds()) * time.Millisecond), nil
+		case 8: // BIGTIME
+			dur := asetime.ASEDuration(endian.Uint64(bs))
 
-		t := asetime.Epoch1900()
-		t = t.AddDate(0, 0, int(days))
-		t = t.Add(time.Duration(int(mins)) * time.Minute)
-		return t, nil
-	case DATETIME:
-		days := asetime.ASEDuration(int32(endian.Uint32(bs[:4]))) * asetime.Day
-		ms := asetime.FractionalSecondToMillisecond(int(endian.Uint32(bs[4:])))
+			t := asetime.EpochRataDie()
+			t = t.Add(time.Duration(dur) * time.Microsecond)
 
-		t := asetime.Epoch1900()
-		t = t.AddDate(0, 0, days.Days())
-		t = t.Add(time.Duration(ms.Microseconds()) * time.Microsecond)
+			return t, nil
+		default:
+			return nil, fmt.Errorf("invalid length for %v: %d", t, len(bs))
+		}
+	case SHORTDATE, DATETIME, DATETIMEN:
+		switch len(bs) {
+		case 0:
+			return nil, nil
+		case 4:
+			days := endian.Uint16(bs[:2])
+			mins := endian.Uint16(bs[2:])
 
-		return t, nil
-	case DATETIMEN:
-		// TODO length-based
-		return nil, nil
+			t := asetime.Epoch1900()
+			t = t.AddDate(0, 0, int(days))
+			t = t.Add(time.Duration(int(mins)) * time.Minute)
+			return t, nil
+		case 8:
+			days := asetime.ASEDuration(int32(endian.Uint32(bs[:4]))) * asetime.Day
+			ms := asetime.FractionalSecondToMillisecond(int(endian.Uint32(bs[4:])))
+
+			t := asetime.Epoch1900()
+			t = t.AddDate(0, 0, days.Days())
+			t = t.Add(time.Duration(ms.Microseconds()) * time.Microsecond)
+
+			return t, nil
+		default:
+			return nil, fmt.Errorf("invalid length for %v: %d", t, len(bs))
+		}
 	case BIGDATETIMEN:
+		if len(bs) == 0 {
+			return nil, nil
+		}
+
 		dur := asetime.ASEDuration(endian.Uint64(bs))
 
 		t := time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC)
 		t = t.AddDate(0, 0, dur.Days())
 		ms := dur.Microseconds() - (dur.Days() * int(asetime.Day))
 		t = t.Add(time.Duration(ms) * time.Microsecond)
-
-		return t, nil
-	case BIGTIMEN:
-		dur := asetime.ASEDuration(endian.Uint64(bs))
-
-		t := asetime.EpochRataDie()
-		t = t.Add(time.Duration(dur) * time.Microsecond)
 
 		return t, nil
 	default:
