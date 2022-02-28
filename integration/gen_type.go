@@ -4,6 +4,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -41,8 +42,11 @@ func DoTest{{.ASEType}}(t *testing.T) {
 }
 
 func test{{.ASEType}}(t *testing.T, db *sql.DB, tableName string) {
+	// insert is the amount of insertions (see fn SetupTableInsert)
+	insert := 2
+
 	pass := make([]interface{}, len(samples{{.ASEType}}))
-	mySamples := make([]{{.GoType}}, len(samples{{.ASEType}}))
+	mySamples := make([]{{.GoType}}, len(samples{{.ASEType}})*insert)
 
 	for i, sample := range samples{{.ASEType}} {
 		{{ if .Convert }}
@@ -58,7 +62,12 @@ func test{{.ASEType}}(t *testing.T, db *sql.DB, tableName string) {
 
 
 		pass[i] = mySample
-		mySamples[i] = mySample
+
+		// Add passed sample for the later validation (for every
+		// insert)
+		for j := 0; j < insert; j++ {
+			mySamples[i+(len(samples{{.ASEType}})*j)] = mySample
+		}
 	}
 
 	rows, teardownFn, err := SetupTableInsert(db, tableName, "{{if .ColumnDef}}{{.ColumnDef}}{{else}}{{.ASETypeLower}}{{end}}", pass...)
@@ -94,8 +103,8 @@ func test{{.ASEType}}(t *testing.T, db *sql.DB, tableName string) {
 		t.Errorf("Error preparing rows: %v", err)
 	}
 
-	if i != len(pass) {
-		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass))
+	if i != len(pass)*insert {
+		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass)*insert)
 	}
 }
 
@@ -292,13 +301,16 @@ func main() {
 // Example:
 //	splitType("github.com/SAP/go-dblib/asetypes.NullTime")
 //	-> "github.com/SAP/go-dblib/asetypes", "asetypes.NullTime"
-//	splitType("sql.NullInt64")
-//	-> "sql", "sql.NullInt64"
 //	splitType("github.com/SAP/go-dblib/*asetypes.Decimal")
 //	-> "github.com/SAP/go-dblib/asetypes", "*asetypes.Decimal"
 func splitType(input string) (string, string) {
 	if !strings.Contains(input, ".") {
 		// Return immediately on e.g. []byte
+		return "", input
+	}
+
+	// Return if input is 'sql.*' since it is already imported
+	if strings.HasPrefix(input, "sql.") {
 		return "", input
 	}
 

@@ -8,6 +8,7 @@ package asetypes
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 	"strconv"
 	"strings"
@@ -34,37 +35,6 @@ var (
 	ErrDecimalScaleTooHigh             = fmt.Errorf("scale is set to more than %d digits", aseMaxDecimalDigits)
 	ErrDecimalScaleBiggerThanPrecision = fmt.Errorf("scale is bigger then precision")
 )
-
-// Number of bytes required to store the integer representation of
-// a decimal.
-// Source: https://github.com/thda/tds/blob/master/num.go:16
-var numBytes = []int{
-	1,
-	2, 2, 3, 3, 4, 4, 4,
-	5, 5, 6, 6, 6,
-	7, 7, 8, 8, 9, 9, 9,
-	10, 10, 11, 11, 11,
-	12, 12, 13, 13, 14, 14, 14,
-	15, 15, 16, 16, 16,
-	17, 17, 18, 18, 19, 19, 19,
-	20, 20, 21, 21, 21,
-	22, 22, 23, 23, 24, 24, 24,
-	25, 25, 26, 26, 26,
-	27, 27, 28, 28, 28,
-	29, 29, 29, 29, 30, 30, 30,
-	31, 31, 32, 32, 32,
-}
-
-// Returns the number of bytes required to store the integer
-// representation of a decimal.
-// Returns -1 when the passed length is invalid.
-// The passed length is the precision of the decimal.
-func DecimalByteSize(length int) int {
-	if length < 0 || length > len(numBytes) {
-		return -1
-	}
-	return numBytes[length]
-}
 
 // Decimal only carries the information of Decimal, Numeric and Money
 // ASE datatypes. This is only sufficient for displaying, not
@@ -157,7 +127,8 @@ func (dec Decimal) Bytes() []byte {
 
 // ByteSize calls DecimalByteSize.
 func (dec Decimal) ByteSize() int {
-	return DecimalByteSize(dec.Precision)
+	// Source: https://github.com/thda/tds/blob/master/num.go#L248
+	return int(math.Ceil(float64(dec.i.BitLen())/8) + 1)
 }
 
 // SetInt64 sets dec.i to i.
@@ -179,6 +150,10 @@ func (dec *Decimal) SetBytes(b []byte) {
 }
 
 func (dec *Decimal) String() string {
+	if dec.i == nil {
+		return "<nil>"
+	}
+
 	s := fmt.Sprintf("%0"+strconv.Itoa(dec.Precision)+"s", big.NewInt(0).Abs(dec.i))
 
 	neg := ""

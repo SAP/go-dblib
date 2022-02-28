@@ -18,21 +18,31 @@ import (
 
 // Bytes returns a byte slice based on a given value-interface and depending
 // on the ASE data type.
-func (t DataType) Bytes(endian binary.ByteOrder, value interface{}) ([]byte, error) {
+// TODO: Instead of parameter 'length', one could use a struct to store
+// additional optional parameters, e.g. 'length', 'datastatus', ...
+// (Problem: golang mod import cycle)
+func (t DataType) Bytes(endian binary.ByteOrder, value interface{}, length int64) ([]byte, error) {
+	// If value is nil, then immediately return an empty byteslice
+	if value == nil {
+		bs := make([]byte, 0)
+		return bs, nil
+	}
+
 	switch t {
-	case MONEY, SHORTMONEY:
-		bs := make([]byte, t.ByteSize())
+	case MONEY, SHORTMONEY, MONEYN:
 		dec, ok := value.(*Decimal)
 		if !ok {
 			return nil, fmt.Errorf("expected *asetypes.Decimal for %s, received %T", t, value)
 		}
 		deci := dec.Int()
 
-		if t == MONEY {
+		bs := make([]byte, length)
+		switch length {
+		case 4: // SHORTMONEY, MONEYN(4)
+			endian.PutUint32(bs, uint32(deci.Int64()))
+		case 8: // MONEY, MONEYN(8)
 			endian.PutUint32(bs[:4], uint32(deci.Int64()>>32))
 			endian.PutUint32(bs[4:], uint32(deci.Int64()))
-		} else {
-			endian.PutUint32(bs, uint32(deci.Int64()))
 		}
 
 		return bs, nil
@@ -52,50 +62,45 @@ func (t DataType) Bytes(endian binary.ByteOrder, value interface{}) ([]byte, err
 		t := asetime.DurationFromDateTime(value.(time.Time))
 		t -= asetime.DurationFromDateTime(asetime.Epoch1900())
 
-		bs := make([]byte, 4)
+		bs := make([]byte, length)
 		endian.PutUint32(bs, uint32(t.Days()))
 		return bs, nil
 	case TIME, TIMEN:
 		dur := asetime.DurationFromTime(value.(time.Time))
 		fract := asetime.MillisecondToFractionalSecond(dur.Microseconds())
 
-		bs := make([]byte, 4)
+		bs := make([]byte, length)
 		endian.PutUint32(bs, uint32(fract))
 		return bs, nil
-	case SHORTDATE:
+	case SHORTDATE, DATETIME, DATETIMEN:
 		t := asetime.DurationFromDateTime(value.(time.Time))
 		t -= asetime.DurationFromDateTime(asetime.Epoch1900())
 
 		days := t.Days()
-		s := asetime.ASEDuration(t.Microseconds() - days*int(asetime.Day))
 
-		bs := make([]byte, 4)
-		// TODO replace all binary.Littleendian
-		binary.LittleEndian.PutUint16(bs[:2], uint16(days))
-		binary.LittleEndian.PutUint16(bs[2:], uint16(s.Minutes()))
-		return bs, nil
-	case DATETIME:
-		t := asetime.DurationFromDateTime(value.(time.Time))
-		t -= asetime.DurationFromDateTime(asetime.Epoch1900())
-
-		days := t.Days()
-		s := t.Microseconds() - days*int(asetime.Day)
-		s = asetime.MillisecondToFractionalSecond(s)
-
-		bs := make([]byte, 8)
-		binary.LittleEndian.PutUint32(bs[:4], uint32(days))
-		binary.LittleEndian.PutUint32(bs[4:], uint32(s))
+		bs := make([]byte, length)
+		switch length {
+		case 4: // SHORTDATE/DATETIME4, DATETIMEN(4)
+			s := asetime.ASEDuration(t.Microseconds() - days*int(asetime.Day))
+			binary.LittleEndian.PutUint16(bs[:2], uint16(days))
+			binary.LittleEndian.PutUint16(bs[2:], uint16(s.Minutes()))
+		case 8: // DATETIME, DATETIMEN(8)
+			s := t.Microseconds() - days*int(asetime.Day)
+			s = asetime.MillisecondToFractionalSecond(s)
+			binary.LittleEndian.PutUint32(bs[:4], uint32(days))
+			binary.LittleEndian.PutUint32(bs[4:], uint32(s))
+		}
 		return bs, nil
 	case BIGDATETIMEN:
 		dur := asetime.DurationFromDateTime(value.(time.Time))
 
-		bs := make([]byte, 8)
+		bs := make([]byte, length)
 		binary.LittleEndian.PutUint64(bs, uint64(dur))
 		return bs, nil
 	case BIGTIMEN:
 		dur := asetime.DurationFromTime(value.(time.Time))
 
-		bs := make([]byte, 8)
+		bs := make([]byte, length)
 		binary.LittleEndian.PutUint64(bs, uint64(dur))
 		return bs, nil
 	case UNITEXT:

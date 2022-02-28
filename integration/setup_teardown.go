@@ -208,7 +208,6 @@ func SetupTableInsert(db *sql.DB, tableName, aseType string, samples ...interfac
 	if _, err := db.Exec(fmt.Sprintf("create table %s (a %s)", tableName, aseType)); err != nil {
 		return nil, nil, fmt.Errorf("failed to create table: %w", err)
 	}
-
 	stmt, err := db.Prepare(fmt.Sprintf("insert into %s (a) values (?)", tableName))
 	if err != nil {
 		return nil, nil, fmt.Errorf("error preparing statement: %w", err)
@@ -218,6 +217,12 @@ func SetupTableInsert(db *sql.DB, tableName, aseType string, samples ...interfac
 	for _, sample := range samples {
 		if _, err := stmt.Exec(sample); err != nil {
 			return nil, nil, fmt.Errorf("failed to execute prepared statement with %v: %w", sample, err)
+		}
+	}
+
+	for _, sample := range samples {
+		if _, err := db.Exec(fmt.Sprintf("insert into %s (a) values (?)", tableName), sample); err != nil {
+			return nil, nil, fmt.Errorf("failed to insert value with %v: %w", sample, err)
 		}
 	}
 

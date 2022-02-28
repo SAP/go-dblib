@@ -21,15 +21,23 @@ func DoTestSmallDateTime(t *testing.T) {
 }
 
 func testSmallDateTime(t *testing.T, db *sql.DB, tableName string) {
+	// insert is the amount of insertions (see fn SetupTableInsert)
+	insert := 2
+
 	pass := make([]interface{}, len(samplesSmallDateTime))
-	mySamples := make([]time.Time, len(samplesSmallDateTime))
+	mySamples := make([]time.Time, len(samplesSmallDateTime)*insert)
 
 	for i, sample := range samplesSmallDateTime {
 
 		mySample := sample
 
 		pass[i] = mySample
-		mySamples[i] = mySample
+
+		// Add passed sample for the later validation (for every
+		// insert)
+		for j := 0; j < insert; j++ {
+			mySamples[i+(len(samplesSmallDateTime)*j)] = mySample
+		}
 	}
 
 	rows, teardownFn, err := SetupTableInsert(db, tableName, "smalldatetime", pass...)
@@ -62,7 +70,7 @@ func testSmallDateTime(t *testing.T, db *sql.DB, tableName string) {
 		t.Errorf("Error preparing rows: %v", err)
 	}
 
-	if i != len(pass) {
-		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass))
+	if i != len(pass)*insert {
+		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass)*insert)
 	}
 }

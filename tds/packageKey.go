@@ -53,7 +53,7 @@ func (pkg KeyPackage) WriteTo(ch BytesChannel) error {
 		return err
 	}
 
-	bs, err := pkg.DataType.Bytes(endian, pkg.Value)
+	bs, err := pkg.DataType.Bytes(endian, pkg.Value, int64(pkg.DataType.LengthBytes()))
 	if err != nil {
 		return fmt.Errorf("tds: error converting value %s to bytes: %w", pkg.DataType, err)
 	}

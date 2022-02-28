@@ -7,75 +7,61 @@
 package asetypes
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"reflect"
 )
 
-// ConvertValue converts a value-interface of an ASE data type into
-// a database/sql/driver.Value with the respective golang data type.
-func (t DataType) ConvertValue(v interface{}) (driver.Value, error) {
-	sv := reflect.ValueOf(v)
+// ValueConverter implements the driver.types.ValueConverter interface.
+type ValueConverter struct{}
 
-	// Return value as-is if the type already matches.
-	if sv.Type() == ReflectTypes[t] {
+// DefaultValueConverter implements the driver.types.ValueConverter
+// interface.
+var DefaultValueConverter ValueConverter
+
+// ConvertValue implements the driver.types.ValueConverter interface.
+func (conv ValueConverter) ConvertValue(v interface{}) (driver.Value, error) {
+	// Check the default value converter
+	if driver.IsValue(v) {
 		return v, nil
 	}
 
-	switch t {
-	case INT1:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return uint8(sv.Int()), nil
+	// Check for driver.Valuer interface, e.g. database/sql.Null<types>
+	if vv, ok := v.(driver.Valuer); ok {
+		// Get value
+		val, err := vv.Value()
+		if err != nil {
+			return nil, err
 		}
-	case INT2:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return int16(sv.Int()), nil
+		// Return nil, if value is nil
+		if val == nil {
+			return nil, nil
 		}
-	case INT4:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return int32(sv.Int()), nil
-		}
-	case INT8, INTN:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return sv.Int(), nil
-		}
-	case UINT2:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return uint16(sv.Uint()), nil
-		}
-	case UINT4:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return uint32(sv.Uint()), nil
-		}
-	case UINT8, UINTN:
-		switch sv.Kind() {
-		case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8,
-			reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8:
-			return sv.Uint(), nil
-		}
-	case FLT4:
-		switch sv.Kind() {
-		case reflect.Float64:
-			return float32(sv.Float()), nil
-		}
-	case FLT8:
-		switch sv.Kind() {
-		case reflect.Float32:
-			return sv.Float(), nil
+		// Catch return of sql.NullInt32, since it's returned as int64
+		switch vv.(type) {
+		case sql.NullInt32:
+			v = int32(val.(int64))
+		default:
+			v = val
 		}
 	}
 
-	return nil, fmt.Errorf("cannot convert %v (type %T) for %s", v, v, t)
+	// Convert any values that can be handled as another type
+	switch value := v.(type) {
+	case int:
+		return int64(value), nil
+	case uint:
+		return uint64(value), nil
+	}
+
+	// Check the reflect types if the value is handled.
+	sv := reflect.TypeOf(v)
+	for _, kind := range ReflectTypes {
+		if kind == sv {
+			return v, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unsupported type %T, a %s", v, sv.Kind())
 }

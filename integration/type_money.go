@@ -21,8 +21,11 @@ func DoTestMoney(t *testing.T) {
 }
 
 func testMoney(t *testing.T, db *sql.DB, tableName string) {
+	// insert is the amount of insertions (see fn SetupTableInsert)
+	insert := 2
+
 	pass := make([]interface{}, len(samplesMoney))
-	mySamples := make([]*asetypes.Decimal, len(samplesMoney))
+	mySamples := make([]*asetypes.Decimal, len(samplesMoney)*insert)
 
 	for i, sample := range samplesMoney {
 
@@ -34,7 +37,12 @@ func testMoney(t *testing.T, db *sql.DB, tableName string) {
 		}
 
 		pass[i] = mySample
-		mySamples[i] = mySample
+
+		// Add passed sample for the later validation (for every
+		// insert)
+		for j := 0; j < insert; j++ {
+			mySamples[i+(len(samplesMoney)*j)] = mySample
+		}
 	}
 
 	rows, teardownFn, err := SetupTableInsert(db, tableName, "money", pass...)
@@ -67,7 +75,7 @@ func testMoney(t *testing.T, db *sql.DB, tableName string) {
 		t.Errorf("Error preparing rows: %v", err)
 	}
 
-	if i != len(pass) {
-		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass))
+	if i != len(pass)*insert {
+		t.Errorf("Only read %d values from database, expected to read %d", i, len(pass)*insert)
 	}
 }
