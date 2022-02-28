@@ -28,8 +28,7 @@ func (conv ValueConverter) ConvertValue(v interface{}) (driver.Value, error) {
 	}
 
 	// Check for driver.Valuer interface, e.g. database/sql.Null<types>
-	vv, ok := v.(driver.Valuer)
-	if ok {
+	if vv, ok := v.(driver.Valuer); ok {
 		// Get value
 		val, err := vv.Value()
 		if err != nil {
