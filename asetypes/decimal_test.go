@@ -34,8 +34,8 @@ func TestDecimal_SetString(t *testing.T) {
 				dec, _ := NewDecimal(cas.precision, cas.scale)
 				if err := dec.SetString(name); err != cas.expectedErr {
 					t.Errorf("Received unexpected error:")
-					t.Errorf("Expected: %w", cas.expectedErr)
-					t.Errorf("Received: %w", err)
+					t.Errorf("Expected: %v", cas.expectedErr)
+					t.Errorf("Received: %v", err)
 				}
 
 				if dec.String() != name {
