@@ -74,30 +74,36 @@ func NewConn(ctx context.Context, info *Info) (*Conn, error) {
 		if info.TLSCAFile != "" {
 			bs, err := os.ReadFile(info.TLSCAFile)
 			if err != nil {
-				return nil, fmt.Errorf("error reading file at ssl-ca path '%s': %w",
+				return nil, fmt.Errorf("error reading file at ssl-ca path '%s': %v",
 					info.TLSCAFile, err)
 			}
 
 			tlsConfig.RootCAs = x509.NewCertPool()
 
+			withCaCert := false
+
 			for {
 				var block *pem.Block
 				block, bs = pem.Decode(bs)
 				if block == nil {
-					return nil, fmt.Errorf("could not parse any valid CA certificate from file '%s'", info.TLSCAFile)
+					break
 				}
 
 				caCert, err := x509.ParseCertificate(block.Bytes)
 				if err != nil {
-					return nil, fmt.Errorf("error parsing CA PEM at ssl-ca path '%s': %w",
+					return nil, fmt.Errorf("error parsing CA PEM at ssl-ca path '%s': %v",
 						info.TLSCAFile, err)
 				}
 
 				tlsConfig.RootCAs.AddCert(caCert)
-
+				withCaCert = true
 				if len(bs) == 0 {
 					break
 				}
+			}
+
+			if !withCaCert {
+				return nil, fmt.Errorf("could not parse any valid CA certificate from file '%s'", info.TLSCAFile)
 			}
 		}
 
