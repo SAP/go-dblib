@@ -74,7 +74,7 @@ func NewConn(ctx context.Context, info *Info) (*Conn, error) {
 		if info.TLSCAFile != "" {
 			bs, err := os.ReadFile(info.TLSCAFile)
 			if err != nil {
-				return nil, fmt.Errorf("error reading file at ssl-ca path '%s': %v",
+				return nil, fmt.Errorf("error reading file at ssl-ca path '%s': %w",
 					info.TLSCAFile, err)
 			}
 
@@ -91,7 +91,7 @@ func NewConn(ctx context.Context, info *Info) (*Conn, error) {
 
 				caCert, err := x509.ParseCertificate(block.Bytes)
 				if err != nil {
-					return nil, fmt.Errorf("error parsing CA PEM at ssl-ca path '%s': %v",
+					return nil, fmt.Errorf("error parsing CA PEM at ssl-ca path '%s': %w",
 						info.TLSCAFile, err)
 				}
 
