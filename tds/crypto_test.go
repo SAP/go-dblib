@@ -47,13 +47,13 @@ func TestCipherChannel_encrypt(t *testing.T) {
 			func(t *testing.T) {
 				cc, err := newCipherChannel(cas.ccOdceType, []byte(cas.symmetricKey))
 				if err != nil {
-					t.Errorf("Error creating cipherChannel: %w", err)
+					t.Errorf("Error creating cipherChannel: %v", err)
 					return
 				}
 
 				ciphertext, _, err := cc.encrypt([]byte(cas.plaintext), []byte(cas.iv))
 				if err != nil {
-					t.Errorf("Error during encryption: %w", err)
+					t.Errorf("Error during encryption: %v", err)
 					return
 				}
 
@@ -73,13 +73,13 @@ func TestCipherChannel_decrypt(t *testing.T) {
 			func(t *testing.T) {
 				cc, err := newCipherChannel(cas.ccOdceType, []byte(cas.symmetricKey))
 				if err != nil {
-					t.Errorf("Error creating cipherChannel: %w", err)
+					t.Errorf("Error creating cipherChannel: %v", err)
 					return
 				}
 
 				plaintext, err := cc.decrypt(cas.ciphertext, []byte(cas.iv))
 				if err != nil {
-					t.Errorf("Error during encryption: %w", err)
+					t.Errorf("Error during encryption: %v", err)
 					return
 				}
 

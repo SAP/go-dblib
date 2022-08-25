@@ -14,9 +14,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net"
+	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -65,22 +65,22 @@ func NewConn(ctx context.Context, info *Info) (*Conn, error) {
 		tlsConfig.InsecureSkipVerify = info.TLSSkipValidation
 
 		if info.TLSHostname != "" {
-			hostname := info.TLSHostname
-			if strings.HasPrefix(hostname, "CN=") {
-				hostname = strings.TrimPrefix(hostname, "CN=")
-			}
+
+			hostname := strings.TrimPrefix(info.TLSHostname, "CN=")
 
 			tlsConfig.ServerName = hostname
 		}
 
 		if info.TLSCAFile != "" {
-			bs, err := ioutil.ReadFile(info.TLSCAFile)
+			bs, err := os.ReadFile(info.TLSCAFile)
 			if err != nil {
 				return nil, fmt.Errorf("error reading file at ssl-ca path '%s': %w",
 					info.TLSCAFile, err)
 			}
 
 			tlsConfig.RootCAs = x509.NewCertPool()
+
+			withCaCert := false
 
 			for {
 				var block *pem.Block
@@ -96,13 +96,13 @@ func NewConn(ctx context.Context, info *Info) (*Conn, error) {
 				}
 
 				tlsConfig.RootCAs.AddCert(caCert)
-
+				withCaCert = true
 				if len(bs) == 0 {
 					break
 				}
 			}
 
-			if len(tlsConfig.RootCAs.Subjects()) == 0 {
+			if !withCaCert {
 				return nil, fmt.Errorf("could not parse any valid CA certificate from file '%s'", info.TLSCAFile)
 			}
 		}

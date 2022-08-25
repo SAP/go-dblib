@@ -9,7 +9,7 @@ package term
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"database/sql"
@@ -29,7 +29,7 @@ func Entrypoint(db *sql.DB, args []string) error {
 	query := strings.Join(args, " ") + ";"
 
 	if *fInputFile != "" {
-		bs, err := ioutil.ReadFile(*fInputFile)
+		bs, err := os.ReadFile(*fInputFile)
 		if err != nil {
 			return fmt.Errorf("term: error reading file '%s': %w", *fInputFile, err)
 		}
