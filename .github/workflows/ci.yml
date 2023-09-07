@@ -39,7 +39,7 @@ jobs:
       - name: Check for go vulnerabilities
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck -v -test ./...
+          govulncheck -test ./...
 
   generate-required:
     runs-on: ubuntu-latest
