@@ -9,7 +9,7 @@ go 1.19
 require (
 	github.com/chzyer/readline v1.5.1
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/hashicorp/go-version v1.6.0
+	github.com/hashicorp/go-version v1.7.0
 )
 
 require (
